@@ -18,51 +18,52 @@ using namespace std;
 
 //#ifdef _DEBUG
 
-void redirectIOToConsole() {
-  AllocConsole(); // allocate a console for this app
+void redirectIOToConsole()
+{
+	AllocConsole(); // allocate a console for this app
 
-  CONSOLE_SCREEN_BUFFER_INFO coninfo;
+	CONSOLE_SCREEN_BUFFER_INFO coninfo;
 
-  // set the screen buffer to be big enough to let us scroll text
-  GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
-  //coninfo.dwSize.Y = MAX_CONSOLE_LINES;
-  SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
+	// set the screen buffer to be big enough to let us scroll text
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
+	//coninfo.dwSize.Y = MAX_CONSOLE_LINES;
+	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
 
-  //freopen("CONIN$", "r", stdin);
-  freopen("CONOUT$", "w", stdout);
-  freopen("CONOUT$", "w", stderr);
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
 
-  // int hConHandle;
-  // long lStdHandle;
-  // FILE *fp;
-  //
-  // // redirect unbuffered STDOUT to the console
-  // lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
-  // hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-  // fp = _fdopen(hConHandle, "w");
-  // *stdout = *fp;
-  // setvbuf(stdout, NULL, _IONBF, 0);
-  // 
-  // // redirect unbuffered STDIN to the console
-  // lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
-  // hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-  // fp = _fdopen(hConHandle, "r");
-  // *stdin = *fp;
-  // setvbuf(stdin, NULL, _IONBF, 0);
-  // 
-  // // redirect unbuffered STDERR to the console
-  // lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
-  // hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-  // fp = _fdopen(hConHandle, "w");
-  // *stderr = *fp;
-  // setvbuf(stderr, NULL, _IONBF, 0);
-  // make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
-  // point to console as well
-  //ios::sync_with_stdio();
+	// int hConHandle;
+	// long lStdHandle;
+	// FILE *fp;
+	//
+	// // redirect unbuffered STDOUT to the console
+	// lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+	// hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	// fp = _fdopen(hConHandle, "w");
+	// *stdout = *fp;
+	// setvbuf(stdout, NULL, _IONBF, 0);
+	// 
+	// // redirect unbuffered STDIN to the console
+	// lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
+	// hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	// fp = _fdopen(hConHandle, "r");
+	// *stdin = *fp;
+	// setvbuf(stdin, NULL, _IONBF, 0);
+	// 
+	// // redirect unbuffered STDERR to the console
+	// lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
+	// hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	// fp = _fdopen(hConHandle, "w");
+	// *stderr = *fp;
+	// setvbuf(stderr, NULL, _IONBF, 0);
+	// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
+	// point to console as well
+	//ios::sync_with_stdio();
 
-  // test stdio
-  //fprintf(stdout, "Test output to stdout\n");
-  //fprintf(stderr, "Test output to stderr\n");
+	// test stdio
+	//fprintf(stdout, "Test output to stdout\n");
+	//fprintf(stderr, "Test output to stderr\n");
 }
 
 //#endif

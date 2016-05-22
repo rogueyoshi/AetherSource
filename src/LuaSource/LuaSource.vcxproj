@@ -1,28 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug_MBCS|Win32">
-      <Configuration>Debug_MBCS</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_MBCS|x64">
-      <Configuration>Debug_MBCS</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release_MBCS|Win32">
-      <Configuration>Release_MBCS</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release_MBCS|x64">
-      <Configuration>Release_MBCS</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
@@ -42,27 +26,23 @@
     <ProjectName>LuaSource</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_MBCS|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MBCS|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -70,47 +50,19 @@
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_MBCS|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MBCS|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_MBCS|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MBCS|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_MBCS|x64'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MBCS|x64'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -121,139 +73,88 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(ProjectDir)_$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MBCS|Win32'">
-    <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(ProjectDir)_$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(ProjectDir)_$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_MBCS|Win32'">
-    <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(ProjectDir)_$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(ProjectDir)_$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MBCS|x64'">
-    <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(ProjectDir)_$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(ProjectDir)_$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_MBCS|x64'">
-    <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(ProjectDir)_$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_DEBUG;WIN32;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;_DEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <Optimization>Custom</Optimization>
+      <EnablePREfast>false</EnablePREfast>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
-      <GenerateDebugInformation>Debug</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <ImportLibrary />
-      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>notelemetry.obj;winmm.lib;d3d11.lib;dxguid.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <ProjectReference />
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MBCS|Win32'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_DEBUG;WIN32;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <Optimization>Custom</Optimization>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-    </ClCompile>
-    <Link>
-      <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
-      <GenerateDebugInformation>Debug</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
-      <TargetMachine>MachineX86</TargetMachine>
-      <ImportLibrary>
-      </ImportLibrary>
-      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-    <ProjectReference />
+    <ResourceCompile />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;NDEBUG;WIN32;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader />
-      <WarningLevel>Level3</WarningLevel>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <Optimization>Custom</Optimization>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-    </ClCompile>
-    <Link>
-      <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
-      <SubSystem>Windows</SubSystem>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <TargetMachine>MachineX86</TargetMachine>
-      <ImportLibrary />
-      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>No</GenerateDebugInformation>
-    </Link>
-    <ProjectReference />
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_MBCS|Win32'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;NDEBUG;WIN32;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;NDEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <EnablePREfast>false</EnablePREfast>
+      <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <Optimization>Custom</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
       <SubSystem>Windows</SubSystem>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <GenerateDebugInformation>No</GenerateDebugInformation>
       <ImportLibrary>
       </ImportLibrary>
       <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
     </Link>
     <ProjectReference />
+    <ResourceCompile />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -261,55 +162,28 @@
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <Optimization>Custom</Optimization>
+      <EnablePREfast>false</EnablePREfast>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
-      <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <TargetMachine>MachineX64</TargetMachine>
       <ImportLibrary />
       <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <ProjectReference />
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MBCS|x64'">
-    <Midl>
-      <TargetEnvironment>X64</TargetEnvironment>
-    </Midl>
-    <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <Optimization>Custom</Optimization>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-    </ClCompile>
-    <Link>
-      <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
-      <GenerateDebugInformation>Debug</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
-      <TargetMachine>MachineX64</TargetMachine>
-      <ImportLibrary>
-      </ImportLibrary>
-      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-    <ProjectReference />
+    <ResourceCompile />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -317,62 +191,44 @@
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader />
-      <WarningLevel>Level3</WarningLevel>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <Optimization>Custom</Optimization>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-    </ClCompile>
-    <Link>
-      <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
-      <SubSystem>Windows</SubSystem>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <TargetMachine>MachineX64</TargetMachine>
-      <ImportLibrary />
-      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>No</GenerateDebugInformation>
-    </Link>
-    <ProjectReference />
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_MBCS|x64'">
-    <Midl>
-      <TargetEnvironment>X64</TargetEnvironment>
-    </Midl>
-    <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;NDEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <Optimization>Custom</Optimization>
+      <EnablePREfast>false</EnablePREfast>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
-      <GenerateDebugInformation>No</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
       <ImportLibrary>
       </ImportLibrary>
       <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
     </Link>
     <ProjectReference />
+    <ResourceCompile />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DibHelper.cpp" />
     <ClCompile Include="DirectXWrapper.cpp" />
+    <ClCompile Include="Filter.cpp" />
     <ClCompile Include="guicon.cpp" />
     <ClCompile Include="OpenFileDialog.cpp" />
-    <ClCompile Include="ScriptEngine.cpp" />
-    <ClCompile Include="LuaSource.cpp" />
+    <ClCompile Include="Pin.cpp" />
+    <ClCompile Include="LuaWrapper.cpp" />
     <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="StringHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
@@ -381,16 +237,14 @@
   <ItemGroup>
     <ClInclude Include="DibHelper.h" />
     <ClInclude Include="DirectXWrapper.h" />
+    <ClInclude Include="Filter.h" />
     <ClInclude Include="guicon.h" />
-    <ClInclude Include="OpenFileDialog.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="ScriptEngine.h" />
-    <ClInclude Include="StringHelper.h" />
     <ClInclude Include="Guids.h" />
-    <ClInclude Include="LuaSource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="LuaSource.rc" />
+    <ClInclude Include="OpenFileDialog.h" />
+    <ClInclude Include="Pin.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="LuaWrapper.h" />
+    <ClInclude Include="StringHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\baseclasses\BaseClasses.vcxproj">
@@ -405,6 +259,9 @@
     <ProjectReference Include="..\lua-5.3.2\lua-5.3.2.vcxproj">
       <Project>{69defc56-922a-4cb2-88cc-f0fb8dd6880c}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,15 +1,15 @@
 #include "OpenFileDialog.h"
 
-OpenFileDialog::OpenFileDialog()
+OpenFileDialog::OpenFileDialog() :
+	DefaultExtension(NULL),
+	Filter(NULL),
+	FilterIndex(NULL),
+	Flags(OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST),
+	InitialDir(NULL),
+	Owner(NULL),
+	Title(NULL)
 {
-	this->DefaultExtension = 0;
-	this->FileName = new TCHAR[MAX_PATH];
-	this->Filter = 0;
-	this->FilterIndex = 0;
-	this->Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-	this->InitialDir = 0;
-	this->Owner = 0;
-	this->Title = 0;
+	FileName = new TCHAR[MAX_PATH];
 }
 
 bool OpenFileDialog::ShowDialog()
@@ -19,20 +19,20 @@ bool OpenFileDialog::ShowDialog()
 	ZeroMemory(&ofn, sizeof(ofn));
 
 	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = this->Owner;
-	ofn.lpstrDefExt = this->DefaultExtension;
-	ofn.lpstrFile = this->FileName;
+	ofn.hwndOwner = Owner;
+	ofn.lpstrDefExt = DefaultExtension;
+	ofn.lpstrFile = FileName;
 	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = MAX_PATH;
-	ofn.lpstrFilter = this->Filter;
-	ofn.nFilterIndex = this->FilterIndex;
-	ofn.lpstrInitialDir = this->InitialDir;
-	ofn.lpstrTitle = this->Title;
-	ofn.Flags = this->Flags;
+	ofn.lpstrFilter = Filter;
+	ofn.nFilterIndex = FilterIndex;
+	ofn.lpstrInitialDir = InitialDir;
+	ofn.lpstrTitle = Title;
+	ofn.Flags = Flags;
 
 	GetOpenFileName(&ofn);
 
-	if (!_tcslen(this->FileName)) return false;
+	if (!_tcslen(FileName)) return false;
 
 	return true;
 }

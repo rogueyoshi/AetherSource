@@ -1,20 +1,11 @@
-#include <streams.h>
-
-#include "LuaSource.h"
-#include "Guids.h"
+#include "Pin.h"
+#include "StringHelper.h"
+#include "OpenFileDialog.h"
 #include "DibHelper.h"
 
-#include "OpenFileDialog.h"
-#include "guicon.h"
+#define FPS(x) UNITS / x
 
-#include "StringHelper.h"
-
-
-#define FPS(number) UNITS / number
-
-
-CPin::CPin(HRESULT *pHr, CSource *pFilter)
-	: CSourceStream(NAME("Pin"), pHr, pFilter, NAME("Output")),
+CPin::CPin(HRESULT *pHr, CSource *pFilter) : CSourceStream(NAME("Pin"), pHr, pFilter, NAME("Output")),
 	//m_FramesWritten(0),
 	//m_bZeroMemory(0),
 	m_iFrameNumber(0)
@@ -32,21 +23,24 @@ CPin::CPin(HRESULT *pHr, CSource *pFilter)
 
 	// Get the dimensions of the incoming bitmaps
 
-	m_pScriptEngine = new CScriptEngine();
+	m_pLuaWrapper = new CLuaWrapper();
 
 	OpenFileDialog *pFileDialog = new OpenFileDialog();
+	pFileDialog->Title = TEXT("Open Lua script");
+	//pFileDialog->DefaultExtension = TEXT(".lua");
+	pFileDialog->Filter = TEXT(".lua");
 
 	if (pFileDialog->ShowDialog())
 	{
+		//SetConsoleTitle(pFileDialog->FileName);
 		SetConsoleTitle(pFileDialog->FileName);
-
-		m_pScriptEngine->Open(tostring(pFileDialog->FileName).c_str());
+		m_pLuaWrapper->Open(to_string(pFileDialog->FileName).c_str());
 	}
 
 	// Get the dimensions
 	//m_iWidth = m_pScriptEngine->GetWidth();
 	//m_iHeight = m_pScriptEngine->GetHeight();
-	m_rtFrameLength = FPS(m_pScriptEngine->GetFPS());
+	m_rtFrameLength = FPS(m_pLuaWrapper->GetFPS());
 
 	/*HDC hDc;
 	hDc = CreateDC(NAME("DISPLAY"), NULL, NULL, NULL);
@@ -56,26 +50,31 @@ CPin::CPin(HRESULT *pHr, CSource *pFilter)
 	// Save dimensions of the main window for later use in FillBuffer()
 	m_rScreen.left = 0;
 	m_rScreen.top = 0;
-	m_rScreen.right = m_pScriptEngine->GetWidth();
-	m_rScreen.bottom = m_pScriptEngine->GetHeight();
+	m_rScreen.right = m_pLuaWrapper->GetWidth();
+	m_rScreen.bottom = m_pLuaWrapper->GetHeight();
 }
 
 CPin::~CPin()
 {
-	m_pScriptEngine->OnDestroy();
-	delete m_pScriptEngine;
+	m_pLuaWrapper->OnDestroy();
+	delete m_pLuaWrapper;
 
-	DbgLog((LOG_TRACE, 3, TEXT("Frames written %d"), m_iFrameNumber));
+	//DbgLog((LOG_TRACE, 3, TEXT("Frames written %d"), m_iFrameNumber));
+}
+
+void CPin::resetResources()
+{
+	m_iFrameNumber = 0;
 }
 
 /*HRESULT CPushPin::OnThreadCreate()
 {
-	return S_OK;
+return S_OK;
 }*/
 
 /*HRESULT CPushPin::OnThreadDestroy()
 {
-	return S_OK;
+return S_OK;
 }*/
 
 //
@@ -101,19 +100,19 @@ HRESULT CPin::CheckMediaType(const CMediaType *pMediaType)
 
 	if (SubType == NULL) return E_INVALIDARG;
 
-	if ((*SubType != MEDIASUBTYPE_RGB32)
-		&& (*SubType != MEDIASUBTYPE_RGB24)
-		&& (*SubType != MEDIASUBTYPE_RGB565)
-		&& (*SubType != MEDIASUBTYPE_RGB555)
-		&& (*SubType != MEDIASUBTYPE_RGB8)
-		)
+	if (
+		(*SubType != MEDIASUBTYPE_RGB32) &&
+		(*SubType != MEDIASUBTYPE_RGB24) &&
+		(*SubType != MEDIASUBTYPE_RGB565) &&
+		(*SubType != MEDIASUBTYPE_RGB555) &&
+		(*SubType != MEDIASUBTYPE_RGB8)
+	)
 	{
 		return E_INVALIDARG;
 	}
 
 	// Get the format area of the media type
 	VIDEOINFO *pvi = (VIDEOINFO *)pMediaType->Format();
-
 	if (pvi == NULL) return E_INVALIDARG;
 
 	// Don't accept formats with negative height, which would cause the 
@@ -121,7 +120,7 @@ HRESULT CPin::CheckMediaType(const CMediaType *pMediaType)
 	if (pvi->bmiHeader.biHeight < 0) return E_INVALIDARG;
 
 	// Check if the image width & height have changed
-	if (pvi->bmiHeader.biWidth != m_pScriptEngine->GetWidth() || abs(pvi->bmiHeader.biHeight) != m_pScriptEngine->GetHeight())
+	if (pvi->bmiHeader.biWidth != m_pLuaWrapper->GetWidth() || abs(pvi->bmiHeader.biHeight) != m_pLuaWrapper->GetHeight())
 	{
 		// If the image width/height is changed, fail CheckMediaType() to force
 		// the renderer to resize the image.
@@ -132,20 +131,20 @@ HRESULT CPin::CheckMediaType(const CMediaType *pMediaType)
 
 } // CheckMediaType
 
-//
-// GetMediaType
-//
-// Prefer 5 formats - 8, 16 (*2), 24 or 32 bits per pixel
-//
-// Prefered types should be ordered by quality, with zero as highest quality.
-// Therefore, iPosition =
-//      0    Return a 32bit mediatype
-//      1    Return a 24bit mediatype
-//      2    Return 16bit RGB565
-//      3    Return a 16bit mediatype (rgb555)
-//      4    Return 8 bit palettised format
-//      >4   Invalid
-//
+  //
+  // GetMediaType
+  //
+  // Prefer 5 formats - 8, 16 (*2), 24 or 32 bits per pixel
+  //
+  // Prefered types should be ordered by quality, with zero as highest quality.
+  // Therefore, iPosition =
+  //      0    Return a 32bit mediatype
+  //      1    Return a 24bit mediatype
+  //      2    Return 16bit RGB565
+  //      3    Return a 16bit mediatype (rgb555)
+  //      4    Return 8 bit palettised format
+  //      >4   Invalid
+  //
 HRESULT CPin::GetMediaType(int iPosition, CMediaType *pMt)
 {
 	CAutoLock autoLock(m_pFilter->pStateLock());
@@ -173,8 +172,8 @@ HRESULT CPin::GetMediaType(int iPosition, CMediaType *pMt)
 
 	// Adjust the parameters common to all formats
 	pvi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	pvi->bmiHeader.biWidth = m_pScriptEngine->GetWidth();
-	pvi->bmiHeader.biHeight = m_pScriptEngine->GetHeight();
+	pvi->bmiHeader.biWidth = m_pLuaWrapper->GetWidth();
+	pvi->bmiHeader.biHeight = m_pLuaWrapper->GetHeight();
 	pvi->bmiHeader.biPlanes = 1;
 	pvi->bmiHeader.biSizeImage = GetBitmapSize(&pvi->bmiHeader);
 	pMt->SetSampleSize(pvi->bmiHeader.biSizeImage);
@@ -216,15 +215,15 @@ HRESULT CPin::SetMediaType(const CMediaType *pMediaType)
 	{
 		VIDEOINFO * pvi = (VIDEOINFO *)m_mt.Format();
 		if (pvi == NULL) return E_UNEXPECTED;
-		
+
 		if (pvi->bmiHeader.biBitCount == 32)
 		{
 			hr = S_OK;
 		}
 		else
 		{
-			ASSERT(FALSE);
 			hr = E_INVALIDARG;
+			ASSERT(FALSE);
 		}
 
 		if (pvi->AvgTimePerFrame) m_rtFrameLength = pvi->AvgTimePerFrame;
@@ -233,13 +232,13 @@ HRESULT CPin::SetMediaType(const CMediaType *pMediaType)
 	return hr;
 } // SetMediaType
 
-//
-// DecideBufferSize
-//
-// This will always be called after the format has been sucessfully
-// negotiated. So we have a look at m_mt to see what size image we agreed.
-// Then we can ask for buffers of the correct size to contain them.
-//
+  //
+  // DecideBufferSize
+  //
+  // This will always be called after the format has been sucessfully
+  // negotiated. So we have a look at m_mt to see what size image we agreed.
+  // Then we can ask for buffers of the correct size to contain them.
+  //
 HRESULT CPin::DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIES *pProperties)
 {
 	CAutoLock autoLock(m_pFilter->pStateLock());
@@ -250,7 +249,6 @@ HRESULT CPin::DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIES *pPro
 	VIDEOINFO *pvi = (VIDEOINFO *)m_mt.Format();
 	pProperties->cBuffers = 1;
 	pProperties->cbBuffer = pvi->bmiHeader.biSizeImage;
-
 	ASSERT(pProperties->cbBuffer);
 
 	// Ask the allocator to reserve us some sample memory. NOTE: the function
@@ -272,8 +270,8 @@ HRESULT CPin::DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIES *pPro
 	return NOERROR;
 } // DecideBufferSize
 
-// This is where we insert the DIB bits into the video stream.
-// FillBuffer is called once for every sample in the stream.
+  // This is where we insert the DIB bits into the video stream.
+  // FillBuffer is called once for every sample in the stream.
 HRESULT CPin::FillBuffer(IMediaSample *pSample)
 {
 	CAutoLock autoLock(m_pFilter->pStateLock());
@@ -287,10 +285,10 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 
 	while (state != State_Running)
 	{
-		// TODO accomodate for pausing better, we're single run only currently [does VLC do pausing even?]
-		Sleep(1);
+	// TODO accomodate for pausing better, we're single run only currently [does VLC do pausing even?]
+	Sleep(1);
 
-		pOwner->GetState(INFINITE, &state);
+	pOwner->GetState(INFINITE, &state);
 	}*/
 
 	// Access the sample's data buffer
@@ -306,20 +304,26 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 	VIDEOINFOHEADER *pVih = (VIDEOINFOHEADER *)m_mt.pbFormat;
 
 	// Start calculating delta
-	DWORD current = GetTickCount64();
-	static DWORD previous = current;
+	// (TODO: fix delta time calculation)
+	DWORD currentTime = GetCurrentTime();
+	static DWORD previousTime = currentTime;
 
-	// Lua
-	m_pScriptEngine->OnUpdate(1.0 / (current - previous));
+	// Update from Lua
+	m_pLuaWrapper->OnUpdate((double)m_rtFrameLength / (currentTime - previousTime) / 100000);
 
-	previous = current;
-
-	m_pScriptEngine->OnRender();
+	// Set time for delta
+	previousTime = GetCurrentTime();
 
 	// Copy the DIB bits over into our filter's output buffer.
 	// Since sample size may be larger than the image size, bound the copy size.
-	int nSize = min(pVih->bmiHeader.biSizeImage, (DWORD)cbData);
-	HBITMAP hBitmap = CopyScreenToBitmap(&m_rScreen, pData, (BITMAPINFO *)&(pVih->bmiHeader));
+	//int nSize = min(pVih->bmiHeader.biSizeImage, (DWORD)cbData);
+
+	// Render from Lua
+	HBITMAP hBitmap = m_pLuaWrapper->OnRender(pData, (BITMAPINFO *)&(pVih->bmiHeader));
+
+	// Screen mirror dummy for now
+	//HBITMAP hBitmap = CopyScreenToBitmap(&m_rScreen, pData, (BITMAPINFO *)&(pVih->bmiHeader));
+
 	if (hBitmap) DeleteObject(hBitmap);
 
 	// Set the timestamps that will govern playback frame rate.
@@ -331,6 +335,7 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 	REFERENCE_TIME rtStop = rtStart + m_rtFrameLength;
 	pSample->SetTime(&rtStart, &rtStop);
 
+	// Increment frame number
 	m_iFrameNumber++;
 
 	// Set TRUE on every sample for uncompressed frames
@@ -393,7 +398,7 @@ HRESULT STDMETHODCALLTYPE CPin::SetFormat(AM_MEDIA_TYPE *pMt)
 
 		// for FMLE's benefit, only accept a setFormat of our "final" width [force setting via registry I guess, otherwise it only shows 80x60 whoa!]	    
 		// flash media live encoder uses setFormat to determine widths [?] and then only displays the smallest? huh?
-		if (pvi->bmiHeader.biWidth != m_pScriptEngine->GetWidth() || pvi->bmiHeader.biHeight != m_pScriptEngine->GetHeight())
+		if (pvi->bmiHeader.biWidth != m_pLuaWrapper->GetWidth() || pvi->bmiHeader.biHeight != m_pLuaWrapper->GetHeight())
 			return E_INVALIDARG;
 
 		// ignore other things like cropping requests for now...
@@ -409,8 +414,8 @@ HRESULT STDMETHODCALLTYPE CPin::SetFormat(AM_MEDIA_TYPE *pMt)
 	{
 		HRESULT hr = m_pFilter->GetFilterGraph()->Reconnect(this);
 		if (hr != S_OK) return hr; // LODO check first, and then just re-use the old one?
-									 // else return early...not really sure how to handle this...since we already set m_mt...but it's a pretty rare case I think...
-									 // plus ours is a weird case...
+								   // else return early...not really sure how to handle this...since we already set m_mt...but it's a pretty rare case I think...
+								   // plus ours is a weird case...
 	}
 	else
 	{
@@ -458,8 +463,8 @@ HRESULT STDMETHODCALLTYPE CPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE **pMt, B
 
 	pVSCC->VideoStandard = AnalogVideo_None;
 
-	pVSCC->InputSize.cx = pVSCC->MinCroppingSize.cx = pVSCC->MaxCroppingSize.cx = pVSCC->MaxOutputSize.cx = m_pScriptEngine->GetWidth();
-	pVSCC->InputSize.cy = pVSCC->MinCroppingSize.cy = pVSCC->MaxCroppingSize.cy = pVSCC->MaxOutputSize.cy = m_pScriptEngine->GetHeight();
+	pVSCC->InputSize.cx = pVSCC->MinCroppingSize.cx = pVSCC->MaxCroppingSize.cx = pVSCC->MaxOutputSize.cx = m_pLuaWrapper->GetWidth();
+	pVSCC->InputSize.cy = pVSCC->MinCroppingSize.cy = pVSCC->MaxCroppingSize.cy = pVSCC->MaxOutputSize.cy = m_pLuaWrapper->GetHeight();
 
 	pVSCC->CropGranularityX = pVSCC->CropGranularityY = 1;
 	pVSCC->CropAlignX = pVSCC->CropAlignY = 1;
@@ -471,7 +476,7 @@ HRESULT STDMETHODCALLTYPE CPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE **pMt, B
 	pVSCC->ShrinkTapsX = pVSCC->ShrinkTapsY = 1;
 
 	pVSCC->MinFrameInterval = m_rtFrameLength;
-	pVSCC->MaxFrameInterval = FPS(1);
+	pVSCC->MaxFrameInterval = FPS(6);
 
 	pVSCC->MinBitsPerSecond = pVSCC->MinOutputSize.cx * pVSCC->MinOutputSize.cy * 8 * FPS((LONG)pVSCC->MinFrameInterval) + sizeof(VIDEOINFO); // if in 8 bit mode 1x1. I guess.
 	pVSCC->MaxBitsPerSecond = pVSCC->MaxOutputSize.cx * pVSCC->MaxOutputSize.cy * 32 * FPS((LONG)pVSCC->MinFrameInterval) + sizeof(VIDEOINFO); // + 44 header size? + the palette?
@@ -487,7 +492,8 @@ HRESULT CPin::Get(
 	DWORD cbInstanceData,  // Size of the instance data (ignore).
 	void *pPropData,       // Buffer to receive the property data.
 	DWORD cbPropData,      // Size of the buffer.
-	DWORD *pcbReturned)    // Return the size of the property.
+	DWORD *pcbReturned     // Return the size of the property.
+)
 {
 	if (guidPropSet != AMPROPSETID_Pin)             return E_PROP_SET_UNSUPPORTED;
 	if (dwPropID != AMPROPERTY_PIN_CATEGORY)        return E_PROP_ID_UNSUPPORTED;
@@ -508,7 +514,8 @@ HRESULT CPin::Set(
 	void *pInstanceData,
 	DWORD cbInstanceData,
 	void *pPropData,
-	DWORD cbPropData)
+	DWORD cbPropData
+)
 {
 	// Set: we don't have any specific properties to set...that we advertise yet anyway, and who would use them anyway?
 	return E_NOTIMPL;
@@ -522,88 +529,4 @@ HRESULT CPin::QuerySupported(REFGUID guidPropSet, DWORD dwPropID, DWORD *pTypeSu
 	if (pTypeSupport) *pTypeSupport = KSPROPERTY_SUPPORT_GET;
 
 	return S_OK;
-}
-
-
-CUnknown * WINAPI CFilter::CreateInstance(IUnknown *pUnk, HRESULT *pHr)
-{
-	CFilter *pNewFilter = new CFilter(pUnk, pHr);
-
-	if (pHr)
-	{
-		if (pNewFilter == NULL)
-			*pHr = E_OUTOFMEMORY;
-		else
-			*pHr = S_OK;
-	}
-
-	return pNewFilter;
-}
-
-STDMETHODIMP CFilter::Run(REFERENCE_TIME tStart)
-{
-	CAutoLock autoLock(m_pLock);
-
-	// Allocate a console window and pipe IO to it
-	redirectIOToConsole();
-	//EnableMenuItem(GetConsoleWindow(), SC_CLOSE, MF_GRAYED);
-	RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
-	SetConsoleTitle(TEXT(TARGET_NAME));
-
-	return CSource::Run(tStart);
-}
-
-STDMETHODIMP CFilter::Stop()
-{
-	CAutoLock autoLock(m_pLock);
-
-	//Reset pin resources
-	m_pPin->m_iFrameNumber = 0;
-
-	// Deallocate console
-	ShowWindow(GetConsoleWindow(), SW_HIDE);
-	FreeConsole();
-
-	return CSource::Stop();
-}
-
-HRESULT CFilter::GetState(DWORD dw, FILTER_STATE *pState)
-{
-	CheckPointer(pState, E_POINTER);
-
-	*pState = m_State;
-
-	if (m_State == State_Paused)
-		return VFW_S_CANT_CUE;
-	else
-		return S_OK;
-}
-
-/*HRESULT CFilter::QueryInterface(REFIID riid, void **ppv)
-{
-	//Forward request for IAMStreamConfig & IKsPropertySet to the pin
-	if (riid == _uuidof(IAMStreamConfig) || riid == _uuidof(IKsPropertySet))
-		return m_pPin->QueryInterface(riid, ppv);
-	else
-		return CSource::QueryInterface(riid, ppv);
-}*/
-
-CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
-	: CSource(NAME("Filter"), pUnk, CLSID_Filter)
-{
-	// The pin magically adds itself to our pin array.
-	m_pPin = new CPin(pHr, this);
-	
-	if (pHr)
-	{
-		if (m_pPin == NULL)
-			*pHr = E_OUTOFMEMORY;
-		else
-			*pHr = S_OK;
-	}
-}
-
-CFilter::~CFilter()
-{
-	delete m_pPin;
 }

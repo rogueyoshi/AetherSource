@@ -9,7 +9,6 @@
 
 #include "DibHelper.h"
 
-
 HBITMAP CopyScreenToBitmap(LPRECT lpRect, BYTE *pData, BITMAPINFO *pHeader)
 {
 	HDC         hScrDC, hMemDC;         // screen DC and memory DC

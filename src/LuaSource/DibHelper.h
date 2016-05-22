@@ -10,14 +10,12 @@
 
 #include <windows.h>
 
-
 #define HDIB HANDLE
 
 /* DIB macros */
 #define IS_WIN30_DIB(lpbi)  ((*(LPDWORD)(lpbi)) == sizeof(BITMAPINFOHEADER))
 #define RECTWIDTH(lpRect)   ((lpRect)->right - (lpRect)->left)
 #define RECTHEIGHT(lpRect)  ((lpRect)->bottom - (lpRect)->top)
-
 
 // Function prototypes
 HDIB BitmapToDIB(HBITMAP hBitmap, HPALETTE hPal);

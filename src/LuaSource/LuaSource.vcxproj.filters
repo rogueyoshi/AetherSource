@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="LuaSource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -13,30 +10,30 @@
     <ClCompile Include="OpenFileDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScriptEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DllMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="guicon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Filter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Pin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StringHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DirectXWrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DibHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LuaSource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OpenFileDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ScriptEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StringHelper.h">
@@ -48,13 +45,27 @@
     <ClInclude Include="guicon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
-    <None Include="LuaSource.def" />
+    <None Include="LuaSource.def">
+      <Filter>Definition Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -69,9 +80,13 @@
       <UniqueIdentifier>{26ec295e-48cd-4299-89aa-12c6c5696e79}</UniqueIdentifier>
       <Extensions>rc</Extensions>
     </Filter>
+    <Filter Include="Definition Files">
+      <UniqueIdentifier>{e2832cd1-9693-4bb5-8480-c580fcf61563}</UniqueIdentifier>
+      <Extensions>def</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="LuaSource.rc">
+    <ResourceCompile Include="resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

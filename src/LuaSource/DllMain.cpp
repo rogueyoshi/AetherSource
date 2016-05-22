@@ -1,9 +1,5 @@
-#include <streams.h>
-#include <initguid.h>
-
-#include "LuaSource.h"
+#include "Filter.h"
 #include "Guids.h"
-
 
 const AMOVIESETUP_MEDIATYPE g_MediaType =
 {
@@ -54,14 +50,12 @@ REGFILTER2 g_RF2 =
 	&g_Pin        // Pointer to pin information.
 };
 
-
 STDAPI DllUnregisterServer()
 {
 	HRESULT hr = AMovieDllRegisterServer2(FALSE);
 	if (FAILED(hr))	return hr;
 
 	IFilterMapper2 *pFM2 = NULL;
-
 	hr = CoCreateInstance(CLSID_FilterMapper2, NULL, CLSCTX_INPROC_SERVER, IID_IFilterMapper2, (void **)&pFM2);
 	if (FAILED(hr))	return hr;
 
@@ -82,18 +76,17 @@ STDAPI DllRegisterServer()
 	if (FAILED(hr)) return hr;
 
 	IFilterMapper2 *pFM2 = NULL;
-
 	hr = CoCreateInstance(CLSID_FilterMapper2, NULL, CLSCTX_INPROC_SERVER, IID_IFilterMapper2, (void **)&pFM2);
 	if (FAILED(hr)) return hr;
 
 	hr = pFM2->RegisterFilter(
-		CLSID_Filter,                // Filter CLSID. 
-		NAME(PROJECT_NAME),                       // Filter name.
+		CLSID_Filter,                    // Filter CLSID. 
+		NAME(PROJECT_NAME),              // Filter name.
 		NULL,                            // Device moniker. 
-		&CLSID_VideoInputDeviceCategory,  // Video compressor category.
-		NULL,                       // Instance data.
-		&g_RF2                    // Pointer to filter information.
-		);
+		&CLSID_VideoInputDeviceCategory, // Video compressor category.
+		NULL,                            // Instance data.
+		&g_RF2                           // Pointer to filter information.
+	);
 
 	pFM2->Release();
 
