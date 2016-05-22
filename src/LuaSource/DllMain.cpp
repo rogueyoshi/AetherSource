@@ -29,6 +29,7 @@ const AMOVIESETUP_FILTER g_Filter =
 	&g_Pin    // Pin details
 };
 
+// DirectShow queries for this global
 CFactoryTemplate g_Templates[] =
 {
 	{
@@ -40,6 +41,7 @@ CFactoryTemplate g_Templates[] =
 	}
 };
 
+// DirectShow queries for this global
 int g_cTemplates = sizeof(g_Templates) / sizeof(g_Templates[0]);
 
 REGFILTER2 g_RF2 =
