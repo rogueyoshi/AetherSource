@@ -7,9 +7,8 @@
 #include "CommonStates.h"
 #include "SpriteBatch.h"
 
+using namespace Microsoft::WRL;
 using namespace DirectX;
-
-typedef Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Texture;
 
 // "I'm not a wrapper."
 class CDirectXWrapper
@@ -42,21 +41,21 @@ protected:
 
 	// DirectX
 	D3D_FEATURE_LEVEL m_featureLevel;
-	Microsoft::WRL::ComPtr<ID3D11Device> m_d3dDevice;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_d3dContext;
+	ComPtr<ID3D11Device> m_d3dDevice;
+	ComPtr<ID3D11DeviceContext> m_d3dContext;
 	DXGI_FORMAT textureFormat;
 	CD3D11_TEXTURE2D_DESC m_textureDesc;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_texture;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTargetView;
+	ComPtr<ID3D11Texture2D> m_texture;
+	ComPtr<ID3D11RenderTargetView> m_renderTargetView;
 	DXGI_FORMAT depthStencilFormat;
 	CD3D11_TEXTURE2D_DESC depthStencilDesc;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
+	ComPtr<ID3D11Texture2D> depthStencil;
 	CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilView;
+	ComPtr<ID3D11DepthStencilView> m_depthStencilView;
 	CD3D11_VIEWPORT m_viewport;
 
 	// DirectXTK
 	std::unique_ptr<CommonStates> m_commonStates;
 	std::unique_ptr<SpriteBatch> m_spriteBatch;
-	std::vector<Texture> m_sprites;
+	std::vector<ComPtr<ID3D11ShaderResourceView>> m_sprites;
 };

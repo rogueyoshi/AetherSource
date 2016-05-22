@@ -59,7 +59,7 @@ void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
 
 int CDirectXWrapper::LoadImage(const wchar_t * filePath)
 {
-	Texture texture;
+	ComPtr<ID3D11ShaderResourceView> texture;
 	DX::ThrowIfFailed(
 		CreateWICTextureFromFile(m_d3dDevice.Get(), filePath, nullptr, texture.ReleaseAndGetAddressOf())
 	);
@@ -92,7 +92,7 @@ void CDirectXWrapper::DrawSprite(int index, float xPosition, float yPosition)
 void CDirectXWrapper::Clear()
 {
 	// Clear the views.
-	m_d3dContext->ClearRenderTargetView(m_renderTargetView.Get(), Colors::Magenta);
+	m_d3dContext->ClearRenderTargetView(m_renderTargetView.Get(), Colors::Transparent);
 	m_d3dContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	// Set render target.
@@ -115,6 +115,8 @@ void CDirectXWrapper::Screenshot()
 	);
 }
 
+// TODO: Isolate and fix the leak in this function.
+// TODO: Figure out why the alpha channel is not reflected in the outgoing pData
 HBITMAP CDirectXWrapper::Capture(BYTE *pData, BITMAPINFO *pHeader)
 {
 	D3D11_TEXTURE2D_DESC textureDesc = m_textureDesc;
@@ -123,34 +125,40 @@ HBITMAP CDirectXWrapper::Capture(BYTE *pData, BITMAPINFO *pHeader)
 	textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
 	//textureDesc.MiscFlags = 0;
 
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+	ComPtr<ID3D11Texture2D> texture;
 	DX::ThrowIfFailed(
 		m_d3dDevice->CreateTexture2D(&textureDesc, nullptr, texture.ReleaseAndGetAddressOf())
 	);
 	m_d3dContext->CopyResource(texture.Get(), m_texture.Get());
-
-	D3D11_MAPPED_SUBRESOURCE resource;
-	m_d3dContext->Map(texture.Get(), D3D11CalcSubresource(0, 0, 0), D3D11_MAP_READ_WRITE, 0, &resource);
-
-	// Copy to bitmap buffer
-	uint8_t *source = reinterpret_cast<uint8_t*>(resource.pData);
-	uint8_t *destination = new uint8_t[textureDesc.Width * textureDesc.Height * 4];
+	
+	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+	m_d3dContext->Map(texture.Get(), D3D11CalcSubresource(0, 0, 0), D3D11_MAP_READ_WRITE, 0, &mappedSubresource);
+	
+	// Copy subresource data to buffer.
+	static std::vector<uint8_t> image_buffer;
+	image_buffer.resize(textureDesc.Width * textureDesc.Height * 4);
+	uint8_t *source = reinterpret_cast<uint8_t*>(mappedSubresource.pData);
+	uint8_t* destination = image_buffer.data();
+	size_t size = std::min<size_t>(textureDesc.Width * 4, mappedSubresource.RowPitch);
 
 	for (size_t h = 0; h < textureDesc.Height; h++)
 	{
-		size_t msize = std::min<size_t>(textureDesc.Width * 4, resource.RowPitch);
-		memcpy_s(destination, textureDesc.Width * 4, source, msize);
-		source += resource.RowPitch;
+		memcpy_s(destination, textureDesc.Width * 4, source, size);
+		source += mappedSubresource.RowPitch;
 		destination += textureDesc.Width * 4;
 	}
 
 	destination -= textureDesc.Width * textureDesc.Height * 4;
 
-	HBITMAP	hBitmap = CreateCompatibleBitmap(GetDC(NULL), textureDesc.Width, textureDesc.Height);
+	// Copy buffer to bitmap.
+	HDC hDC = GetDC(NULL);
+	HBITMAP	hBitmap = CreateCompatibleBitmap(hDC, textureDesc.Width, textureDesc.Height);
 	SetBitmapBits(hBitmap, textureDesc.Width * textureDesc.Height * 4, destination);
 
-	// Copy into provided buffer
-	GetDIBits(GetDC(NULL), hBitmap, 0, textureDesc.Height, pData, pHeader, DIB_RGB_COLORS);
+	// Copy bitmap into provided buffer.
+	GetDIBits(hDC, hBitmap, 0, textureDesc.Height, pData, pHeader, DIB_RGB_COLORS);
+
+	ReleaseDC(NULL, hDC);
 
 	return hBitmap;
 }

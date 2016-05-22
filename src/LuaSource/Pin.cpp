@@ -101,6 +101,7 @@ HRESULT CPin::CheckMediaType(const CMediaType *pMediaType)
 	if (SubType == NULL) return E_INVALIDARG;
 
 	if (
+		(*SubType != MEDIASUBTYPE_ARGB32) &&
 		(*SubType != MEDIASUBTYPE_RGB32) &&
 		(*SubType != MEDIASUBTYPE_RGB24) &&
 		(*SubType != MEDIASUBTYPE_RGB565) &&
@@ -154,7 +155,7 @@ HRESULT CPin::GetMediaType(int iPosition, CMediaType *pMt)
 	if (iPosition < 0) return E_INVALIDARG;
 
 	// Have we run off the end of types?
-	if (iPosition > 4) return VFW_S_NO_MORE_ITEMS;
+	if (iPosition > 5) return VFW_S_NO_MORE_ITEMS;
 
 	VIDEOINFO *pvi = (VIDEOINFO *)pMt->AllocFormatBuffer(sizeof(VIDEOINFO));
 	if (!pvi) return(E_OUTOFMEMORY);
