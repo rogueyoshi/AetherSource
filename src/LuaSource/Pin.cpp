@@ -1,7 +1,6 @@
 #include "Pin.h"
 #include "StringHelper.h"
 #include "OpenFileDialog.h"
-#include "DibHelper.h"
 
 #define FPS(x) UNITS / x
 
@@ -25,14 +24,15 @@ CPin::CPin(HRESULT *pHr, CSource *pFilter) : CSourceStream(NAME("Pin"), pHr, pFi
 
 	m_pLuaWrapper = new CLuaWrapper();
 
-	OpenFileDialog *pFileDialog = new OpenFileDialog();
+	static OpenFileDialog *pFileDialog = new OpenFileDialog();
 	pFileDialog->Title = TEXT("Open Lua script");
 	//pFileDialog->DefaultExtension = TEXT(".lua");
 	pFileDialog->Filter = TEXT(".lua");
 
-	if (pFileDialog->ShowDialog())
+	if (!_tcslen(pFileDialog->FileName)) pFileDialog->ShowDialog();
+	
+	if (_tcslen(pFileDialog->FileName))
 	{
-		//SetConsoleTitle(pFileDialog->FileName);
 		SetConsoleTitle(pFileDialog->FileName);
 		m_pLuaWrapper->Open(to_string(pFileDialog->FileName).c_str());
 	}
@@ -48,10 +48,10 @@ CPin::CPin(HRESULT *pHr, CSource *pFilter) : CSourceStream(NAME("Pin"), pHr, pFi
 	DeleteDC(hDc);*/
 
 	// Save dimensions of the main window for later use in FillBuffer()
-	m_rScreen.left = 0;
-	m_rScreen.top = 0;
-	m_rScreen.right = m_pLuaWrapper->GetWidth();
-	m_rScreen.bottom = m_pLuaWrapper->GetHeight();
+	//m_rScreen.left = 0;
+	//m_rScreen.top = 0;
+	//m_rScreen.right = m_pLuaWrapper->GetWidth();
+	//m_rScreen.bottom = m_pLuaWrapper->GetHeight();
 }
 
 CPin::~CPin()
@@ -190,6 +190,7 @@ HRESULT CPin::GetMediaType(int iPosition, CMediaType *pMt)
 	pMt->SetTemporalCompression(FALSE);
 
 	// Work out the GUID for the subtype from the header info.
+	// TODO: Figure out how to get it to accept the MEDIASUBTYPE_ARGB32 subtype
 	if (*pMt->Subtype() == GUID_NULL)
 	{
 		const GUID SubTypeGUID = GetBitmapSubtype(&pvi->bmiHeader);
@@ -286,7 +287,7 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 
 	while (state != State_Running)
 	{
-	// TODO accomodate for pausing better, we're single run only currently [does VLC do pausing even?]
+	// TODO: accomodate for pausing better, we're single run only currently [does VLC do pausing even?]
 	Sleep(1);
 
 	pOwner->GetState(INFINITE, &state);
@@ -305,9 +306,8 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 	VIDEOINFOHEADER *pVih = (VIDEOINFOHEADER *)m_mt.pbFormat;
 
 	// Update from Lua
+	static DWORD previousTime = GetCurrentTime();
 	DWORD currentTime = GetCurrentTime();
-	static DWORD previousTime = currentTime;
-
 	m_pLuaWrapper->OnUpdate((currentTime - previousTime) * 0.001);
 
 	// Copy the DIB bits over into our filter's output buffer.
@@ -318,9 +318,12 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 	//HBITMAP hBitmap = CopyScreenToBitmap(&m_rScreen, pData, (BITMAPINFO *)&(pVih->bmiHeader));
 
 	// Render from Lua and copy bitmap into provided buffer
+	currentTime = GetCurrentTime();
 	HBITMAP hBitmap = m_pLuaWrapper->OnRender((currentTime - previousTime) * 0.001);
 	HDC hDC = GetDC(NULL);
 	GetDIBits(hDC, hBitmap, 0, m_pLuaWrapper->GetHeight(), pData, (BITMAPINFO *)&(pVih->bmiHeader), DIB_RGB_COLORS);
+
+	// Erase handle and release DC
 
 	if (hBitmap) DeleteObject(hBitmap);
 

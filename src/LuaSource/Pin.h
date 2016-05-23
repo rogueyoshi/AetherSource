@@ -62,16 +62,16 @@ protected:
 
 	REFERENCE_TIME m_rtFrameLength;
 
-	RECT m_rScreen;                     // Rect containing entire screen coordinates
+	//RECT m_rScreen;                     // Rect containing entire screen coordinates
 
-										//int m_iHeight;                 // The current image height
-										//int m_iWidth;                  // And current image width
-										//int m_iCurrentBitDepth;             // Screen bit depth
-										//int m_iRepeatTime;                  // Time in msec between frames
+	//int m_iHeight;                 // The current image height
+    //int m_iWidth;                  // And current image width
+    //int m_iCurrentBitDepth;             // Screen bit depth
+    //int m_iRepeatTime;                  // Time in msec between frames
 
-										//CMediaType m_MediaType;
-										//CCritSec m_cSharedState;            // Protects our internal state
-										//CImageDisplay m_Display;            // Figures out our media type for us
+    //CMediaType m_MediaType;
+    //CCritSec m_cSharedState;            // Protects our internal state
+    //CImageDisplay m_Display;            // Figures out our media type for us
 
 	CLuaWrapper *m_pLuaWrapper;
 };

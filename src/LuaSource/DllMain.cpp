@@ -4,6 +4,7 @@
 const AMOVIESETUP_MEDIATYPE g_MediaType =
 {
 	&MEDIATYPE_Video,  // Major type
+	//&MEDIASUBTYPE_ARGB32 // Minor type
 	&MEDIASUBTYPE_NULL // Minor type
 };
 

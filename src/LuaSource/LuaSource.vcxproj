@@ -99,7 +99,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\robot\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;_DEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
@@ -220,7 +220,6 @@
     <ResourceCompile />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DibHelper.cpp" />
     <ClCompile Include="DirectXWrapper.cpp" />
     <ClCompile Include="Filter.cpp" />
     <ClCompile Include="guicon.cpp" />
@@ -235,7 +234,6 @@
     <None Include="LuaSource.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DibHelper.h" />
     <ClInclude Include="DirectXWrapper.h" />
     <ClInclude Include="Filter.h" />
     <ClInclude Include="guicon.h" />

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <codecvt>
+#include "StringHelper.h"
 
 std::wstring to_wstring(std::string str)
 {

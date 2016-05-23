@@ -10,6 +10,12 @@ OpenFileDialog::OpenFileDialog() :
 	Title(NULL)
 {
 	FileName = new TCHAR[MAX_PATH];
+	ZeroMemory(FileName, sizeof(FileName));
+}
+
+OpenFileDialog::~OpenFileDialog()
+{
+	delete FileName;
 }
 
 bool OpenFileDialog::ShowDialog()

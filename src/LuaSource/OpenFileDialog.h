@@ -7,6 +7,7 @@ class OpenFileDialog
 {
 public:
 	OpenFileDialog();
+	~OpenFileDialog();
 
 	bool ShowDialog();
 

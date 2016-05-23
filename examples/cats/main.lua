@@ -34,7 +34,7 @@ end
 
 function OnRender(dt)	
 	for _, cat in pairs(cats) do
-		DrawSprite(cat.image, cat.xPosition + math.sin(time * 8) * 16, cat.yPosition + math.sin(time * 8) * 16)
+		DrawSprite(cat.image, cat.xPosition + math.sin(time * 8) * 16, cat.yPosition + math.sin(time * 4) * 16)
 	end
 	
 	--drawText ('Hello World', 'Arial', 128, 100, 50, 0xff0099ff)

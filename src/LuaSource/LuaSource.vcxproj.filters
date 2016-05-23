@@ -4,9 +4,6 @@
     <ClCompile Include="DirectXWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DibHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OpenFileDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -30,9 +27,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DibHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OpenFileDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
