@@ -23,8 +23,8 @@ public:
 	void SetFPS(int iFPS);
 	
 	void OnDestroy();
-	void OnUpdate(double dt);
-	HBITMAP OnRender(BYTE *pData, BITMAPINFO *pHeader);
+	void OnUpdate(double deltaTime);
+	HBITMAP OnRender(double deltaTime);
 protected:
 	int LuaGetWidth(lua_State *L);
 	int LuaGetHeight(lua_State *L);

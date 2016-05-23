@@ -31,7 +31,7 @@ public:
 	void Clear();
 	void Flush();
 	void Screenshot();
-	HBITMAP Capture(BYTE *pData, BITMAPINFO *pHeader);
+	HBITMAP Capture();
 protected:
 	void CreateDevice();
 	void CreateResources();

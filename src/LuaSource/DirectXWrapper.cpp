@@ -117,7 +117,7 @@ void CDirectXWrapper::Screenshot()
 
 // TODO: Isolate and fix the leak in this function.
 // TODO: Figure out why the alpha channel is not reflected in the outgoing pData
-HBITMAP CDirectXWrapper::Capture(BYTE *pData, BITMAPINFO *pHeader)
+HBITMAP CDirectXWrapper::Capture()
 {
 	D3D11_TEXTURE2D_DESC textureDesc = m_textureDesc;
 	textureDesc.Usage = D3D11_USAGE_STAGING;
@@ -154,10 +154,6 @@ HBITMAP CDirectXWrapper::Capture(BYTE *pData, BITMAPINFO *pHeader)
 	HDC hDC = GetDC(NULL);
 	HBITMAP	hBitmap = CreateCompatibleBitmap(hDC, textureDesc.Width, textureDesc.Height);
 	SetBitmapBits(hBitmap, textureDesc.Width * textureDesc.Height * 4, destination);
-
-	// Copy bitmap into provided buffer.
-	GetDIBits(hDC, hBitmap, 0, textureDesc.Height, pData, pHeader, DIB_RGB_COLORS);
-
 	ReleaseDC(NULL, hDC);
 
 	return hBitmap;

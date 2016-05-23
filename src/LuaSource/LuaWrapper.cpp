@@ -101,16 +101,16 @@ void CLuaWrapper::OnDestroy()
 	lua_call(m_pLuaState, 0, 0);
 }
 
-void CLuaWrapper::OnUpdate(double dt)
+void CLuaWrapper::OnUpdate(double deltaTime)
 {
 	if (!IsOpen()) return;
 
 	lua_getglobal(m_pLuaState, "OnUpdate");
-	lua_pushnumber(m_pLuaState, dt);
+	lua_pushnumber(m_pLuaState, deltaTime);
 	lua_call(m_pLuaState, 1, 0);
 }
 
-HBITMAP CLuaWrapper::OnRender(BYTE *pData, BITMAPINFO *pHeader)
+HBITMAP CLuaWrapper::OnRender(double deltaTime)
 {
 	if (!IsOpen()) return NULL;
 
@@ -119,7 +119,8 @@ HBITMAP CLuaWrapper::OnRender(BYTE *pData, BITMAPINFO *pHeader)
 
 	// Execute draw commands from Lua
 	lua_getglobal(m_pLuaState, "OnRender");
-	lua_call(m_pLuaState, 0, 0);
+	lua_pushnumber(m_pLuaState, deltaTime);
+	lua_call(m_pLuaState, 1, 0);
 
 	// Check if sprite batch is still active
 	if (m_previousRenderCall.find("DrawSprite") != std::string::npos)
@@ -135,7 +136,7 @@ HBITMAP CLuaWrapper::OnRender(BYTE *pData, BITMAPINFO *pHeader)
 	m_previousRenderCall = "";
 
 	//return NULL;
-	return m_pDirectXWrapper->Capture(pData, pHeader);
+	return m_pDirectXWrapper->Capture();
 }
 
 int CLuaWrapper::LuaGetWidth(lua_State *L)

@@ -304,28 +304,27 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 
 	VIDEOINFOHEADER *pVih = (VIDEOINFOHEADER *)m_mt.pbFormat;
 
-	// Start calculating delta
-	// (TODO: fix delta time calculation)
+	// Update from Lua
 	DWORD currentTime = GetCurrentTime();
 	static DWORD previousTime = currentTime;
 
-	// Update from Lua
-	m_pLuaWrapper->OnUpdate((double)m_rtFrameLength / (currentTime - previousTime) / 100000);
-
-	// Set time for delta
-	previousTime = GetCurrentTime();
+	m_pLuaWrapper->OnUpdate((currentTime - previousTime) * 0.001);
 
 	// Copy the DIB bits over into our filter's output buffer.
 	// Since sample size may be larger than the image size, bound the copy size.
 	//int nSize = min(pVih->bmiHeader.biSizeImage, (DWORD)cbData);
 
-	// Render from Lua
-	HBITMAP hBitmap = m_pLuaWrapper->OnRender(pData, (BITMAPINFO *)&(pVih->bmiHeader));
-
 	// Screen mirror dummy for now
 	//HBITMAP hBitmap = CopyScreenToBitmap(&m_rScreen, pData, (BITMAPINFO *)&(pVih->bmiHeader));
 
+	// Render from Lua and copy bitmap into provided buffer
+	HBITMAP hBitmap = m_pLuaWrapper->OnRender((currentTime - previousTime) * 0.001);
+	HDC hDC = GetDC(NULL);
+	GetDIBits(hDC, hBitmap, 0, m_pLuaWrapper->GetHeight(), pData, (BITMAPINFO *)&(pVih->bmiHeader), DIB_RGB_COLORS);
+
 	if (hBitmap) DeleteObject(hBitmap);
+
+	ReleaseDC(NULL, hDC);
 
 	// Set the timestamps that will govern playback frame rate.
 	// If this file is getting written out as an AVI,
@@ -341,6 +340,9 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 
 	// Set TRUE on every sample for uncompressed frames
 	pSample->SetSyncPoint(TRUE);
+
+	// Set time for delta
+	previousTime = GetCurrentTime();
 
 	return S_OK;
 }
