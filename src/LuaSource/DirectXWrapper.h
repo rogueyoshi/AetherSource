@@ -49,12 +49,7 @@ protected:
 	void CreateResources();
 
 	// Windows
-	static CDirectXWrapper *m_pThis;
 	static HHOOK m_hHook;
-
-	LRESULT CALLBACK _HookProc(int message, WPARAM wParam, LPARAM lParam);
-	static LRESULT CALLBACK HookProc(int message, WPARAM wParam, LPARAM lParam) { return m_pThis->_HookProc(message, wParam, lParam); }
-	void SetWindowsHooks();
 
 	// DirectX
 	D3D_FEATURE_LEVEL m_featureLevel;

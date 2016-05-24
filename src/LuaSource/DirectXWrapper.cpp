@@ -1,3 +1,4 @@
+#include <thread>
 #include <algorithm>
 #define NOMINMAX
 
@@ -45,33 +46,34 @@ CDirectXWrapper::CDirectXWrapper() :
 	m_keyboard = std::make_unique<Keyboard>();
 	m_gamePad = std::make_unique<GamePad>();
 
-	SetWindowsHooks();
+	// Create Windows messaging thread
+	std::thread{ [this] () {
+		m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT CALLBACK {
+			switch (message)
+			{
+			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
+			case WM_KEYUP:
+			case WM_SYSKEYUP:
+				Keyboard::ProcessMessage(message, wParam, lParam);
+				break;
+			}
+
+			return CallNextHookEx(m_hHook, message, wParam, lParam);
+		}, NULL, 0);
+
+		MSG msg;
+		while (GetMessage(&msg, NULL, 0, 0));
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	} }.detach();
 }
 
 CDirectXWrapper::~CDirectXWrapper()
 {
 	UnhookWindowsHookEx(m_hHook);
-}
-
-void CDirectXWrapper::SetWindowsHooks()
-{
-	m_pThis = this; 
-	m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, CDirectXWrapper::HookProc, NULL, 0);
-}
-
-LRESULT CALLBACK CDirectXWrapper::_HookProc(int message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-	case WM_KEYDOWN:
-	case WM_SYSKEYDOWN:
-	case WM_KEYUP:
-	case WM_SYSKEYUP:
-		Keyboard::ProcessMessage(message, wParam, lParam);
-		break;
-	}
-
-	return CallNextHookEx(m_hHook, message, wParam, lParam);
 }
 
 void CDirectXWrapper::SetResolution(int iWidth, int iHeight)

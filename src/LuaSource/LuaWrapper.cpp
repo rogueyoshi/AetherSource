@@ -140,13 +140,6 @@ void CLuaWrapper::OnRender(double deltaTime)
 
 void CLuaWrapper::UpdateKeyboard()
 {
-	/*MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0));
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}*/
-
 	auto keyboard = m_pDirectXWrapper->GetKeyboardState();
 
 	lua_newtable(m_pLuaState);
