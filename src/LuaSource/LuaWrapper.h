@@ -22,10 +22,14 @@ public:
 	int GetFPS() { return m_iFPS; }
 	void SetFPS(int iFPS);
 	
+	HBITMAP Capture() { return m_pDirectXWrapper->Capture(); }
+
 	void OnDestroy();
 	void OnUpdate(double deltaTime);
-	HBITMAP OnRender(double deltaTime);
+	void OnRender(double deltaTime);
 protected:
+	void UpdateKeyboard();
+
 	int LuaGetWidth(lua_State *L);
 	int LuaGetHeight(lua_State *L);
 	int LuaGetFPS(lua_State *L);

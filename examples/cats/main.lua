@@ -1,8 +1,4 @@
-local width = GetDisplayWidth()
-local height = GetDisplayHeight()
-local fps = 30
-
-SetResolution(width, height, fps);
+SetResolution(GetDisplayWidth(), GetDisplayHeight(), 30);
 
 local catImage = LoadImage("cat.png")
 
@@ -11,8 +7,8 @@ local cats = {}
 for i = 1, 32 do
 	local cat = {
 		image = catImage,
-		xPosition = math.random(width),
-		yPosition = math.random(height)
+		xPosition = math.random(GetWidth()),
+		yPosition = math.random(GetHeight())
 	}
 
 	table.insert(cats, cat)
@@ -24,18 +20,20 @@ function OnDestroy()
 	--
 end
 
-function OnUpdate(dt)	
+function OnUpdate(deltaTime)
+	print(Keyboard.Shift, Keyboard.Control, Keyboard.Alt, Keyboard.Windows)
+
 	for _, cat in pairs(cats) do
 		--
 	end
 	
-	time = time + dt
+	time = time + deltaTime
 end
 
-function OnRender(dt)	
+function OnRender(deltaTime)	
 	for _, cat in pairs(cats) do
 		DrawSprite(cat.image, cat.xPosition + math.sin(time * 8) * 16, cat.yPosition + math.sin(time * 4) * 16)
 	end
 	
-	--drawText ('Hello World', 'Arial', 128, 100, 50, 0xff0099ff)
+	DrawText('Hello World', 'Arial', 128, 100, 50, 0xFF0099FF)
 end

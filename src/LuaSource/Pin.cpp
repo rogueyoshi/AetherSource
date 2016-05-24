@@ -305,26 +305,23 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 
 	VIDEOINFOHEADER *pVih = (VIDEOINFOHEADER *)m_mt.pbFormat;
 
-	// Update from Lua
-	static DWORD previousTime = GetCurrentTime();
+	// Update and Render from Lua
 	DWORD currentTime = GetCurrentTime();
-	m_pLuaWrapper->OnUpdate((currentTime - previousTime) * 0.001);
+	static DWORD previousTime = currentTime;
+	double deltaTime = (currentTime - previousTime) * 0.001;
+	m_pLuaWrapper->OnUpdate(deltaTime);
+	m_pLuaWrapper->OnRender(deltaTime);
+
+	// Capture output from Lua's DirectX instance
+	HBITMAP hBitmap = m_pLuaWrapper->Capture();
 
 	// Copy the DIB bits over into our filter's output buffer.
 	// Since sample size may be larger than the image size, bound the copy size.
 	//int nSize = min(pVih->bmiHeader.biSizeImage, (DWORD)cbData);
-
-	// Screen mirror dummy for now
-	//HBITMAP hBitmap = CopyScreenToBitmap(&m_rScreen, pData, (BITMAPINFO *)&(pVih->bmiHeader));
-
-	// Render from Lua and copy bitmap into provided buffer
-	currentTime = GetCurrentTime();
-	HBITMAP hBitmap = m_pLuaWrapper->OnRender((currentTime - previousTime) * 0.001);
 	HDC hDC = GetDC(NULL);
 	GetDIBits(hDC, hBitmap, 0, m_pLuaWrapper->GetHeight(), pData, (BITMAPINFO *)&(pVih->bmiHeader), DIB_RGB_COLORS);
 
 	// Erase handle and release DC
-
 	if (hBitmap) DeleteObject(hBitmap);
 
 	ReleaseDC(NULL, hDC);

@@ -1,10 +1,12 @@
 #include <algorithm>
 #define NOMINMAX
 
+#include <stdlib.h>
 #include <wincodec.h>
 #include <DirectXColors.h>
 
 #include "DirectXWrapper.h"
+#include "StringHelper.h"
 #include "SimpleMath.h"
 #include "WICTextureLoader.h"
 #include "ScreenGrab.h"
@@ -26,6 +28,9 @@ namespace DX
 	}
 }
 
+CDirectXWrapper *CDirectXWrapper::m_pThis = NULL;
+HHOOK CDirectXWrapper::m_hHook = NULL;
+
 CDirectXWrapper::CDirectXWrapper() :
 	m_iWidth(1),
 	m_iHeight(1),
@@ -36,11 +41,37 @@ CDirectXWrapper::CDirectXWrapper() :
 	CreateResources();
 
 	m_spriteBatch = std::make_unique<SpriteBatch>(m_d3dContext.Get());
+
+	m_keyboard = std::make_unique<Keyboard>();
+	m_gamePad = std::make_unique<GamePad>();
+
+	SetWindowsHooks();
 }
 
 CDirectXWrapper::~CDirectXWrapper()
 {
+	UnhookWindowsHookEx(m_hHook);
+}
 
+void CDirectXWrapper::SetWindowsHooks()
+{
+	m_pThis = this; 
+	m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, CDirectXWrapper::HookProc, NULL, 0);
+}
+
+LRESULT CALLBACK CDirectXWrapper::_HookProc(int message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		Keyboard::ProcessMessage(message, wParam, lParam);
+		break;
+	}
+
+	return CallNextHookEx(m_hHook, message, wParam, lParam);
 }
 
 void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
@@ -57,21 +88,19 @@ void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
 	if (bChanged) CreateResources();
 }
 
-int CDirectXWrapper::LoadImage(const wchar_t * filePath)
+Image CDirectXWrapper::LoadImage(const wchar_t * filePath)
 {
-	ComPtr<ID3D11ShaderResourceView> texture;
+	Image texture;
 	DX::ThrowIfFailed(
-		CreateWICTextureFromFile(m_d3dDevice.Get(), filePath, nullptr, texture.ReleaseAndGetAddressOf())
+		CreateWICTextureFromFile(m_d3dDevice.Get(), filePath, nullptr, &texture)
 	);
 
-	m_sprites.push_back(texture);
-
-	return m_sprites.size() - 1;
+	return texture;
 }
 
-void CDirectXWrapper::DeleteImage(int index)
+void CDirectXWrapper::DeleteImage(Image image)
 {
-	m_sprites.erase(m_sprites.begin() + index);
+	delete image;
 }
 
 void CDirectXWrapper::BeginSpriteBatch()
@@ -84,10 +113,33 @@ void CDirectXWrapper::EndSpriteBatch()
 	m_spriteBatch->End();
 }
 
-void CDirectXWrapper::DrawSprite(int index, float xPosition, float yPosition)
+void CDirectXWrapper::DrawSprite(Image image, float xPosition, float yPosition)
 {
-	m_spriteBatch->Draw(m_sprites.at(index).Get(), Vector2{ xPosition, yPosition });
+	m_spriteBatch->Draw(image, Vector2{ xPosition, yPosition });
 }
+
+void CDirectXWrapper::DrawText(const WCHAR *text, LPCWSTR font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
+{
+	static std::wstring previousFont;
+
+	if (std::wstring(font) != previousFont)
+	{
+		if (!previousFont.empty()) m_fw1FontWrapper->Release();
+
+		m_fw1FontFactory->CreateFontWrapper(m_d3dDevice.Get(), font, &m_fw1FontWrapper);
+
+		previousFont = font;
+	}
+
+	m_fw1FontWrapper->DrawString(
+		m_d3dContext.Get(),
+		text, // String
+		size, // Font size
+		x, // X position
+		y, // Y position
+		color, // Text color, 0xAaBbGgRr
+		FW1_RESTORESTATE); // Flags (for example FW1_RESTORESTATE to keep context states unchanged)
+};
 
 void CDirectXWrapper::Clear()
 {
@@ -103,7 +155,7 @@ void CDirectXWrapper::Clear()
 	m_d3dContext->RSSetViewports(1, &m_viewport);
 }
 
-void CDirectXWrapper::Flush()
+void CDirectXWrapper::Render()
 {
 	m_d3dContext->Flush();
 }
@@ -115,8 +167,7 @@ void CDirectXWrapper::Screenshot()
 	);
 }
 
-// TODO: Isolate and fix the leak in this function.
-// TODO: Figure out why the alpha channel is not reflected in the outgoing pData
+// TODO: Figure out why the alpha channel is not reflected in the outgoing bitmap.
 HBITMAP CDirectXWrapper::Capture()
 {
 	D3D11_TEXTURE2D_DESC textureDesc = m_textureDesc;
@@ -130,14 +181,14 @@ HBITMAP CDirectXWrapper::Capture()
 		m_d3dDevice->CreateTexture2D(&textureDesc, nullptr, texture.ReleaseAndGetAddressOf())
 	);
 	m_d3dContext->CopyResource(texture.Get(), m_texture.Get());
-	
+
 	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
 	m_d3dContext->Map(texture.Get(), D3D11CalcSubresource(0, 0, 0), D3D11_MAP_READ_WRITE, 0, &mappedSubresource);
-	
+
 	// Copy subresource data to buffer.
 	static std::vector<uint8_t> image_buffer;
 	image_buffer.resize(textureDesc.Width * textureDesc.Height * 4);
-	uint8_t *source = reinterpret_cast<uint8_t*>(mappedSubresource.pData);
+	uint8_t *source = reinterpret_cast<uint8_t *>(mappedSubresource.pData);
 	uint8_t* destination = image_buffer.data();
 	size_t size = std::min<size_t>(textureDesc.Width * 4, mappedSubresource.RowPitch);
 
@@ -176,6 +227,8 @@ void CDirectXWrapper::CreateDevice()
 	);
 
 	m_commonStates = std::make_unique<CommonStates>(m_d3dDevice.Get());
+
+	FW1CreateFactory(FW1_VERSION, &m_fw1FontFactory);
 }
 
 void CDirectXWrapper::CreateResources()

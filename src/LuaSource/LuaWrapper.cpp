@@ -105,14 +105,16 @@ void CLuaWrapper::OnUpdate(double deltaTime)
 {
 	if (!IsOpen()) return;
 
+	UpdateKeyboard();
+
 	lua_getglobal(m_pLuaState, "OnUpdate");
 	lua_pushnumber(m_pLuaState, deltaTime);
 	lua_call(m_pLuaState, 1, 0);
 }
 
-HBITMAP CLuaWrapper::OnRender(double deltaTime)
+void CLuaWrapper::OnRender(double deltaTime)
 {
-	if (!IsOpen()) return NULL;
+	if (!IsOpen()) return;
 
 	// Clear render target
 	m_pDirectXWrapper->Clear();
@@ -130,13 +132,46 @@ HBITMAP CLuaWrapper::OnRender(double deltaTime)
 	}
 
 	// Render to texture
-	m_pDirectXWrapper->Flush();
+	m_pDirectXWrapper->Render();
 
 	// Reset tracked render call
 	m_previousRenderCall = "";
+}
 
-	//return NULL;
-	return m_pDirectXWrapper->Capture();
+void CLuaWrapper::UpdateKeyboard()
+{
+	/*MSG msg;
+	while (GetMessage(&msg, NULL, 0, 0));
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}*/
+
+	auto keyboard = m_pDirectXWrapper->GetKeyboardState();
+
+	lua_newtable(m_pLuaState);
+
+	lua_pushliteral(m_pLuaState, "Shift");
+	lua_pushboolean(m_pLuaState, keyboard.LeftShift || keyboard.RightShift);
+	lua_settable(m_pLuaState, -3);
+
+	lua_pushliteral(m_pLuaState, "Control");
+	lua_pushboolean(m_pLuaState, keyboard.LeftControl || keyboard.RightControl);
+	lua_settable(m_pLuaState, -3);
+
+	lua_pushliteral(m_pLuaState, "Alt");
+	lua_pushboolean(m_pLuaState, keyboard.LeftAlt || keyboard.RightAlt);
+	lua_settable(m_pLuaState, -3);
+
+	lua_pushliteral(m_pLuaState, "Windows");
+	lua_pushboolean(m_pLuaState, keyboard.LeftWindows || keyboard.RightWindows);
+	lua_settable(m_pLuaState, -3);
+
+	lua_pushliteral(m_pLuaState, "A");
+	lua_pushboolean(m_pLuaState, keyboard.A);
+	lua_settable(m_pLuaState, -3);
+
+	lua_setglobal(m_pLuaState, "Keyboard");
 }
 
 int CLuaWrapper::LuaGetWidth(lua_State *L)
@@ -160,6 +195,7 @@ int CLuaWrapper::LuaGetFPS(lua_State *L)
 	return 1;
 }
 
+// TODO: Change this to accept a table with arguments
 int CLuaWrapper::LuaSetResolution(lua_State *L)
 {
 	SetResolution((int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2));
@@ -170,9 +206,9 @@ int CLuaWrapper::LuaSetResolution(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayWidth(lua_State *L)
 {
-	HDC hDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
+	HDC hDC = GetDC(NULL);
 	int width = GetDeviceCaps(hDC, HORZRES);
-	DeleteDC(hDC);
+	ReleaseDC(NULL, hDC);
 
 	lua_pushinteger(L, width);
 
@@ -181,10 +217,10 @@ int CLuaWrapper::LuaGetDisplayWidth(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayHeight(lua_State *L)
 {
-	HDC hDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
+	HDC hDC = GetDC(NULL);
 	int height = GetDeviceCaps(hDC, VERTRES);
-	DeleteDC(hDC);
-	
+	ReleaseDC(NULL, hDC);
+
 	lua_pushinteger(L, height);
 
 	return 1;
@@ -192,9 +228,9 @@ int CLuaWrapper::LuaGetDisplayHeight(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayFrequency(lua_State *L)
 {
-	HDC hDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
+	HDC hDC = GetDC(NULL);
 	int frequency = GetDeviceCaps(hDC, VREFRESH);
-	DeleteDC(hDC);
+	ReleaseDC(NULL, hDC);
 
 	lua_pushinteger(L, frequency);
 
@@ -205,28 +241,29 @@ int CLuaWrapper::LuaLoadImage(lua_State *L)
 {
 	const char *filePath = luaL_checkstring(L, 1);
 
-	int index = m_pDirectXWrapper->LoadImage(to_wstring(filePath).c_str());
+	Image image = m_pDirectXWrapper->LoadImage(to_wstring(filePath).c_str());
 
-	lua_pushinteger(L, index);
+	lua_pushlightuserdata(L, image);
 
 	return 1;
 }
 
+// TODO: Change this to accept a table with arguments
 int CLuaWrapper::LuaDrawSprite(lua_State *L)
 {
-	if (m_previousRenderCall.find(__FUNCTION__) == std::string::npos)
+	if (m_previousRenderCall != __FUNCTION__)
 	{
 		// Begin sprite batch
 	    m_pDirectXWrapper->BeginSpriteBatch();
 	}
 
 	// Get arguments
-	long long index = luaL_checkinteger(L, 1);
+	Image image = (Image)lua_touserdata(L, 1);
 	double xPosition = luaL_checknumber(L, 2);
 	double yPosition = luaL_checknumber(L, 3);
 	
 	// Draw sprite
-    m_pDirectXWrapper->DrawSprite(int(index), float(xPosition), float(yPosition));
+    m_pDirectXWrapper->DrawSprite(image, float(xPosition), float(yPosition));
 
 	//
 	m_previousRenderCall = __FUNCTION__;
@@ -239,6 +276,7 @@ int CLuaWrapper::LuaLoadFont(lua_State * L)
 	return 0;
 }
 
+// TODO: Change this to accept a table with arguments
 int CLuaWrapper::LuaDrawText(lua_State * L)
 {
 	if (m_previousRenderCall.find("DrawSprite") != std::string::npos)
@@ -247,7 +285,15 @@ int CLuaWrapper::LuaDrawText(lua_State * L)
 		m_pDirectXWrapper->EndSpriteBatch();
 	}
 
-	// Draw text
+	// (LPCWSTR text, LPCWSTR font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
+	const char *text = luaL_checkstring(L, 1);
+	const char *font = luaL_checkstring(L, 2);
+	double size = luaL_checknumber(L, 3);
+	double x = luaL_checknumber(L, 4);
+	double y = luaL_checknumber(L, 5);
+	long long color = luaL_optinteger(L, 6, 0xFFFFFFFF);
+
+	m_pDirectXWrapper->DrawText(to_wstring(text).c_str(), to_wstring(font).c_str(), float(size), float(x), float(y), UINT32(color));
 
 	m_previousRenderCall = __FUNCTION__;
 
