@@ -72,8 +72,10 @@ bool CLuaWrapper::Open(const char *fn)
 	lua_register(m_pLuaState, "GetHeight", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetHeight>);
 	lua_register(m_pLuaState, "GetFPS", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetFPS>);
 	lua_register(m_pLuaState, "LoadImage", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadImage>);
+	lua_register(m_pLuaState, "ReleaseImage", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseImage>);
 	lua_register(m_pLuaState, "DrawSprite", &NLuaWrapper::dispatch<&CLuaWrapper::LuaDrawSprite>);
 	lua_register(m_pLuaState, "LoadFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadFont>);
+	lua_register(m_pLuaState, "ReleaseFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseFont>);
 	lua_register(m_pLuaState, "DrawText", &NLuaWrapper::dispatch<&CLuaWrapper::LuaDrawText>);
 	lua_register(m_pLuaState, "LoadSound", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadSound>);
 	lua_register(m_pLuaState, "PlaySound", &NLuaWrapper::dispatch<&CLuaWrapper::LuaPlaySound>);
@@ -189,7 +191,8 @@ int CLuaWrapper::LuaGetFPS(lua_State *L)
 	return 1;
 }
 
-// TODO: Change this to accept a table with arguments
+// TODO: Change these to accept a table with the arguments instead
+
 int CLuaWrapper::LuaSetResolution(lua_State *L)
 {
 	SetResolution((int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2));
@@ -242,6 +245,15 @@ int CLuaWrapper::LuaLoadImage(lua_State *L)
 	return 1;
 }
 
+int CLuaWrapper::LuaReleaseImage(lua_State * L)
+{
+	Image image = (Image)lua_touserdata(L, 1);
+
+	m_pDirectXWrapper->ReleaseImage(image);
+
+	return 0;
+}
+
 // TODO: Change this to accept a table with arguments
 int CLuaWrapper::LuaDrawSprite(lua_State *L)
 {
@@ -251,13 +263,27 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	    m_pDirectXWrapper->BeginSpriteBatch();
 	}
 
+	lua_settop(L, 1);
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	// Now to get the data out of the table
+	// 'unpack' the table by putting the values onto
+	// the stack first. Then convert those stack values
+	// into an appropriate C type.
+	lua_getfield(L, 1, "image");
+	lua_getfield(L, 1, "x");
+	lua_getfield(L, 1, "y");
+
 	// Get arguments
-	Image image = (Image)lua_touserdata(L, 1);
-	double xPosition = luaL_checknumber(L, 2);
-	double yPosition = luaL_checknumber(L, 3);
+	Image image = (Image)lua_touserdata(L, -3);
+	double xPosition = luaL_checknumber(L, -2);
+	double yPosition = luaL_checknumber(L, -1);
 	
 	// Draw sprite
     m_pDirectXWrapper->DrawSprite(image, float(xPosition), float(yPosition));
+
+	//
+	lua_pop(L, 3);
 
 	//
 	m_previousRenderCall = __FUNCTION__;
@@ -267,6 +293,21 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 
 int CLuaWrapper::LuaLoadFont(lua_State * L)
 {
+	const char *fontFamily = luaL_checkstring(L, 1);
+
+	Font font = m_pDirectXWrapper->LoadFont(to_wstring(fontFamily).c_str());
+
+	lua_pushlightuserdata(L, font);
+
+	return 1;
+}
+
+int CLuaWrapper::LuaReleaseFont(lua_State * L)
+{
+	Font font = (Font)lua_touserdata(L, 1);
+
+	m_pDirectXWrapper->ReleaseFont(font);
+
 	return 0;
 }
 
@@ -279,15 +320,31 @@ int CLuaWrapper::LuaDrawText(lua_State * L)
 		m_pDirectXWrapper->EndSpriteBatch();
 	}
 
-	// (LPCWSTR text, LPCWSTR font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
-	const char *text = luaL_checkstring(L, 1);
-	const char *font = luaL_checkstring(L, 2);
-	double size = luaL_checknumber(L, 3);
-	double x = luaL_checknumber(L, 4);
-	double y = luaL_checknumber(L, 5);
-	long long color = luaL_optinteger(L, 6, 0xFFFFFFFF);
+	lua_settop(L, 1);
+	luaL_checktype(L, 1, LUA_TTABLE);
 
-	m_pDirectXWrapper->DrawText(to_wstring(text).c_str(), to_wstring(font).c_str(), float(size), float(x), float(y), UINT32(color));
+	// Now to get the data out of the table
+	// 'unpack' the table by putting the values onto
+	// the stack first. Then convert those stack values
+	// into an appropriate C type.
+	lua_getfield(L, 1, "text");
+	lua_getfield(L, 1, "font");
+	lua_getfield(L, 1, "size");
+	lua_getfield(L, 1, "x");
+	lua_getfield(L, 1, "y");
+	lua_getfield(L, 1, "color");
+
+	// Get arguments
+	const char *text = luaL_checkstring(L, -6);
+	Font font = (Font)lua_touserdata(L, -5);
+	double size = luaL_checknumber(L, -4);
+	double x = luaL_checknumber(L, -3);
+	double y = luaL_checknumber(L, -2);
+	long long color = luaL_optinteger(L, -1, 0xFFFFFFFF);
+
+	m_pDirectXWrapper->DrawText(to_wstring(text).c_str(), font, float(size), float(x), float(y), UINT32(color));
+
+	lua_pop(L, 6);
 
 	m_previousRenderCall = __FUNCTION__;
 

@@ -46,10 +46,8 @@ CDirectXWrapper::CDirectXWrapper() :
 
 	// Install hooks and create Windows messaging thread.
 	// TODO: Figure out why this isn't fully working.
-	m_pHookThread = new std::thread([]()
-	{
-		m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT
-		{
+	m_pHookThread = new std::thread([]() {
+		m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT {
 			switch (message)
 			{
 			case WM_KEYDOWN:
@@ -103,19 +101,10 @@ Image CDirectXWrapper::LoadImage(const wchar_t * filePath)
 	return texture;
 }
 
-void CDirectXWrapper::DeleteImage(Image image)
+void CDirectXWrapper::ReleaseImage(Image image)
 {
+	image->Release();
 	delete image;
-}
-
-void CDirectXWrapper::BeginSpriteBatch()
-{
-	m_spriteBatch->Begin(SpriteSortMode_Deferred, m_commonStates->NonPremultiplied());
-}
-
-void CDirectXWrapper::EndSpriteBatch()
-{
-	m_spriteBatch->End();
 }
 
 void CDirectXWrapper::DrawSprite(Image image, float xPosition, float yPosition)
@@ -123,20 +112,23 @@ void CDirectXWrapper::DrawSprite(Image image, float xPosition, float yPosition)
 	m_spriteBatch->Draw(image, Vector2{ xPosition, yPosition });
 }
 
-void CDirectXWrapper::DrawText(const WCHAR *text, LPCWSTR font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
+Font CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
 {
-	static std::wstring previousFont;
+	Font font;
+	m_fw1FontFactory->CreateFontWrapper(m_d3dDevice.Get(), fontFamily, &font);
 
-	if (std::wstring(font) != previousFont)
-	{
-		if (!previousFont.empty()) m_fw1FontWrapper->Release();
+	return font;
+}
 
-		m_fw1FontFactory->CreateFontWrapper(m_d3dDevice.Get(), font, &m_fw1FontWrapper);
+void CDirectXWrapper::ReleaseFont(Font font)
+{
+	font->Release();
+	delete font;
+}
 
-		previousFont = font;
-	}
-
-	m_fw1FontWrapper->DrawString(
+void CDirectXWrapper::DrawText(const WCHAR *text, Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
+{
+	font->DrawString(
 		m_d3dContext.Get(),
 		text, // String
 		size, // Font size
@@ -160,16 +152,19 @@ void CDirectXWrapper::Clear()
 	m_d3dContext->RSSetViewports(1, &m_viewport);
 }
 
+void CDirectXWrapper::BeginSpriteBatch()
+{
+	m_spriteBatch->Begin(SpriteSortMode_Deferred, m_commonStates->NonPremultiplied());
+}
+
+void CDirectXWrapper::EndSpriteBatch()
+{
+	m_spriteBatch->End();
+}
+
 void CDirectXWrapper::Render()
 {
 	m_d3dContext->Flush();
-}
-
-void CDirectXWrapper::Screenshot()
-{
-	DX::ThrowIfFailed(
-		SaveWICTextureToFile(m_d3dContext.Get(), m_texture.Get(), GUID_ContainerFormatPng, L"Screenshot.png")
-	);
 }
 
 // TODO: Figure out why the alpha channel is not reflected in the outgoing bitmap.
@@ -213,6 +208,13 @@ HBITMAP CDirectXWrapper::Capture()
 	ReleaseDC(NULL, hDC);
 
 	return hBitmap;
+}
+
+void CDirectXWrapper::Screenshot(LPCWSTR fileName)
+{
+	DX::ThrowIfFailed(
+		SaveWICTextureToFile(m_d3dContext.Get(), m_texture.Get(), GUID_ContainerFormatPng, fileName)
+	);
 }
 
 void CDirectXWrapper::CreateDevice()

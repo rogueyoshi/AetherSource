@@ -1,7 +1,7 @@
 #pragma once
 
-#include <thread>
 #include <vector>
+#include <thread>
 #include <wrl/client.h>
 #include <d3d11_1.h>
 
@@ -15,6 +15,7 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 
 typedef ID3D11ShaderResourceView *Image;
+typedef IFW1FontWrapper *Font;
 
 // "I'm not a wrapper."
 class CDirectXWrapper
@@ -30,17 +31,19 @@ public:
 	Keyboard::State GetKeyboardState() { return m_keyboard->GetState(); }
 
 	Image LoadImage(const wchar_t *filePath);
-	void DeleteImage(Image image);
-
-	void BeginSpriteBatch();
-	void EndSpriteBatch();
+	void ReleaseImage(Image image);
 	void DrawSprite(Image image, float xPosition, float yPosition);
-	void DrawText(const WCHAR *text, LPCWSTR font, FLOAT size, FLOAT x, FLOAT y, UINT32 color);
+
+	Font LoadFont(LPCWSTR fontFamily);
+	void ReleaseFont(Font font);
+	void DrawText(const WCHAR *text, Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color);
 
 	void Clear();
+	void BeginSpriteBatch();
+	void EndSpriteBatch();
 	void Render();
-	void Screenshot();
 	HBITMAP Capture();
+	void Screenshot(LPCWSTR fileName);
 protected:
 	int m_iWidth;
 	int m_iHeight;
@@ -75,5 +78,4 @@ protected:
 
 	// FW1 Font Wrapper
 	IFW1Factory *m_fw1FontFactory;
-	IFW1FontWrapper *m_fw1FontWrapper;
 };

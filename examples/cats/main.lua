@@ -1,6 +1,6 @@
 SetResolution(GetDisplayWidth(), GetDisplayHeight(), 30);
 
-local catImage = LoadImage("cat.png")
+local catImage = LoadImage('cat.png')
 
 local cats = {}
 
@@ -14,10 +14,13 @@ for i = 1, 32 do
 	table.insert(cats, cat)
 end
 
+local font = LoadFont("Arial")
+
 local time = 0
 
 function OnDestroy()
-	--
+	ReleaseImage(catImage)
+	ReleaseFont(font)
 end
 
 function OnUpdate(deltaTime)
@@ -32,8 +35,21 @@ end
 
 function OnRender(deltaTime)	
 	for _, cat in pairs(cats) do
-		DrawSprite(cat.image, cat.xPosition + math.sin(time * 8) * 16, cat.yPosition + math.sin(time * 4) * 16)
+		DrawSprite
+		{
+			image = cat.image,
+			x = cat.xPosition + math.sin(time * 8) * 16,
+			y = cat.yPosition + math.sin(time * 4) * 16
+		}
 	end
 	
-	DrawText('Hello World', 'Arial', 128, 100, 50, 0xFF0099FF)
+	DrawText
+	{
+		text = 'Hello World',
+		font = font,
+		size = 128,
+		x = 100,
+		y = 50,
+		color = 0xFF0099FF
+	}
 end
