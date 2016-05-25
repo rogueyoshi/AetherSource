@@ -1,14 +1,14 @@
 #include "Filter.h"
 #include "Guids.h"
 
-const AMOVIESETUP_MEDIATYPE g_MediaType =
+const AMOVIESETUP_MEDIATYPE g_MediaTypeSetup =
 {
 	&MEDIATYPE_Video,  // Major type
 	//&MEDIASUBTYPE_ARGB32 // Minor type
 	&MEDIASUBTYPE_NULL // Minor type
 };
 
-const AMOVIESETUP_PIN g_Pin =
+const AMOVIESETUP_PIN g_PinSetup =
 {
 	NULL,        // Obsolete, not used.
 	FALSE,       // Is this pin rendered?
@@ -18,39 +18,51 @@ const AMOVIESETUP_PIN g_Pin =
 	&CLSID_NULL, // Obsolete.
 	NULL,        // Obsolete.
 	1,           // Number of media types.
-	&g_MediaType // Pointer to media types.
+	&g_MediaTypeSetup // Pointer to media types.
 };
 
-const AMOVIESETUP_FILTER g_Filter =
+const AMOVIESETUP_FILTER g_FilterSetup =
 {
 	&CLSID_Filter,      // Filter CLSID
 	NAME(PROJECT_NAME),       // String name
 	MERIT_DO_NOT_USE,       // Filter merit
 	1,                      // Number pins
-	&g_Pin    // Pin details
+	&g_PinSetup    // Pin details
 };
 
 // DirectShow queries for this global
 CFactoryTemplate g_Templates[] =
 {
 	{
-		NAME(PROJECT_NAME),               // Name
-		&CLSID_Filter,       // CLSID
-		CFilter::CreateInstance, // Method to create an instance of PushSource
-		NULL,                           // Initialization function
-		&g_Filter           // Set-up information (for filters)
+		NAME(PROJECT_NAME), // Name
+		&CLSID_Filter, // CLSID
+		[](IUnknown *pUnk, HRESULT *pHr) -> CUnknown * // Method to create an instance of PushSource
+		{
+			CFilter *pFilter = new CFilter(pUnk, pHr);
+			if (pHr)
+			{
+				if (pFilter == NULL)
+					*pHr = E_OUTOFMEMORY;
+				else
+					*pHr = S_OK;
+			}
+
+			return pFilter;
+		},
+		NULL, // Initialization function
+		&g_FilterSetup // Set-up information (for filters)
 	}
 };
 
 // DirectShow queries for this global
 int g_cTemplates = sizeof(g_Templates) / sizeof(g_Templates[0]);
 
-REGFILTER2 g_RF2 =
+REGFILTER2 g_rf2 =
 {
 	1,              // Version 1 (no pin mediums or pin category).
 	MERIT_DO_NOT_USE,   // Merit.
 	1,              // Number of pins.
-	&g_Pin        // Pointer to pin information.
+	&g_PinSetup        // Pointer to pin information.
 };
 
 STDAPI DllUnregisterServer()
@@ -88,7 +100,7 @@ STDAPI DllRegisterServer()
 		NULL,                            // Device moniker. 
 		&CLSID_VideoInputDeviceCategory, // Video compressor category.
 		NULL,                            // Instance data.
-		&g_RF2                           // Pointer to filter information.
+		&g_rf2                           // Pointer to filter information.
 	);
 
 	pFM2->Release();

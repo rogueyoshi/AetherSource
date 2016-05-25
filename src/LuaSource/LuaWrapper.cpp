@@ -7,6 +7,7 @@
 #define MINIMUM_FPS 6
 
 // Wrap the lua function wrapper into a namespace for disambiguation and future-proofing in case we add more lua classes.
+// TODO: Make a version of this that wraps lambdas and use those instead of class member methods.
 namespace NLuaWrapper
 {
 	typedef int (CLuaWrapper::*signature)(lua_State *L);
@@ -54,7 +55,7 @@ bool CLuaWrapper::Close()
 	return false;
 }
 
-bool CLuaWrapper::Open(const char * fn)
+bool CLuaWrapper::Open(const char *fn)
 {
 	Close();
 
@@ -76,7 +77,7 @@ bool CLuaWrapper::Open(const char * fn)
 	lua_register(m_pLuaState, "DrawText", &NLuaWrapper::dispatch<&CLuaWrapper::LuaDrawText>);
 	lua_register(m_pLuaState, "LoadSound", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadSound>);
 	lua_register(m_pLuaState, "PlaySound", &NLuaWrapper::dispatch<&CLuaWrapper::LuaPlaySound>);
-	
+
 	if (luaL_dofile(m_pLuaState, fn) != LUA_OK)
 	{
 		Close();

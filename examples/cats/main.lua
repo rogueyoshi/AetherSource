@@ -21,7 +21,7 @@ function OnDestroy()
 end
 
 function OnUpdate(deltaTime)
-	print(Keyboard.Shift, Keyboard.Control, Keyboard.Alt, Keyboard.Windows)
+	print('Control', Keyboard.Control, 'Alt', Keyboard.Alt)
 
 	for _, cat in pairs(cats) do
 		--

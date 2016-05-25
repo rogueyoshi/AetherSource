@@ -5,7 +5,8 @@
 class CFilter : public CSource
 {
 public:
-	static CUnknown * WINAPI CreateInstance(IUnknown *pUnk, HRESULT *pHr);
+	CFilter(IUnknown *pUnk, HRESULT *pHr);
+	~CFilter();
 	
 	//
 	STDMETHODIMP Run(REFERENCE_TIME tStart);
@@ -15,10 +16,6 @@ public:
 	//STDMETHODIMP QueryInterface(REFIID riid, void **ppv);
 	//ULONG STDMETHODCALLTYPE AddRef() { return CSource::AddRef(); };
 	//ULONG STDMETHODCALLTYPE Release() { return CSource::Release(); };
-private:
-	// Constructor is private because you have to use CreateInstance
-	CFilter(IUnknown *pUnk, HRESULT *pHr);
-	~CFilter();
-	
+private:	
 	//CPin *m_pPin;
 };

@@ -1,4 +1,3 @@
-#include <thread>
 #include <algorithm>
 #define NOMINMAX
 
@@ -29,12 +28,11 @@ namespace DX
 	}
 }
 
-CDirectXWrapper *CDirectXWrapper::m_pThis = NULL;
 HHOOK CDirectXWrapper::m_hHook = NULL;
 
 CDirectXWrapper::CDirectXWrapper() :
-	m_iWidth(1),
-	m_iHeight(1),
+	m_iWidth(MINIMUM_WIDTH),
+	m_iHeight(MINIMUM_HEIGHT),
 	textureFormat(DXGI_FORMAT_B8G8R8A8_UNORM), //DXGI_FORMAT_R8G8B8A8_UNORM
 	depthStencilFormat(DXGI_FORMAT_D24_UNORM_S8_UINT)
 {
@@ -46,9 +44,12 @@ CDirectXWrapper::CDirectXWrapper() :
 	m_keyboard = std::make_unique<Keyboard>();
 	m_gamePad = std::make_unique<GamePad>();
 
-	// Create Windows messaging thread
-	std::thread{ [this] () {
-		m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT CALLBACK {
+	// Install hooks and create Windows messaging thread.
+	// TODO: Figure out why this isn't fully working.
+	m_pHookThread = new std::thread([]()
+	{
+		m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT
+		{
 			switch (message)
 			{
 			case WM_KEYDOWN:
@@ -68,12 +69,14 @@ CDirectXWrapper::CDirectXWrapper() :
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-	} }.detach();
+	});
+	m_pHookThread->detach();
 }
 
 CDirectXWrapper::~CDirectXWrapper()
 {
 	UnhookWindowsHookEx(m_hHook);
+	delete m_pHookThread;
 }
 
 void CDirectXWrapper::SetResolution(int iWidth, int iHeight)

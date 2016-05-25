@@ -14,7 +14,7 @@ public:
 	bool IsOpen();
 
 	bool Close();
-	bool Open(const char * fn);
+	bool Open(const char *fn);
 
 	int GetWidth() { return m_pDirectXWrapper->GetWidth(); }
 	int GetHeight() { return m_pDirectXWrapper->GetHeight(); }

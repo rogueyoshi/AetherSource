@@ -1,15 +1,15 @@
 #pragma once
 
+#include <thread>
 #include <vector>
 #include <wrl/client.h>
 #include <d3d11_1.h>
 
 #include "CommonStates.h"
 #include "SpriteBatch.h"
-#include "FW1FontWrapper.h"
 #include "Keyboard.h"
-#include "Mouse.h"
 #include "GamePad.h"
+#include "FW1FontWrapper.h"
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
@@ -27,6 +27,8 @@ public:
 	int GetHeight() { return m_iHeight; }
 	void SetResolution(int iWidth, int iHeight);
 
+	Keyboard::State GetKeyboardState() { return m_keyboard->GetState(); }
+
 	Image LoadImage(const wchar_t *filePath);
 	void DeleteImage(Image image);
 
@@ -34,8 +36,6 @@ public:
 	void EndSpriteBatch();
 	void DrawSprite(Image image, float xPosition, float yPosition);
 	void DrawText(const WCHAR *text, LPCWSTR font, FLOAT size, FLOAT x, FLOAT y, UINT32 color);
-
-	Keyboard::State CDirectXWrapper::GetKeyboardState() { return m_keyboard->GetState(); }
 
 	void Clear();
 	void Render();
@@ -50,6 +50,7 @@ protected:
 
 	// Windows
 	static HHOOK m_hHook;
+	std::thread *m_pHookThread;
 
 	// DirectX
 	D3D_FEATURE_LEVEL m_featureLevel;
@@ -66,7 +67,7 @@ protected:
 	ComPtr<ID3D11DepthStencilView> m_depthStencilView;
 	CD3D11_VIEWPORT m_viewport;
 
-	// DirectXTK
+	// DirectX Tool Kit
 	std::unique_ptr<CommonStates> m_commonStates;
 	std::unique_ptr<SpriteBatch> m_spriteBatch;
 	std::unique_ptr<Keyboard> m_keyboard;
