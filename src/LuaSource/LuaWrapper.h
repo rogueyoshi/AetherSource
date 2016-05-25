@@ -14,7 +14,7 @@ public:
 	bool IsOpen();
 
 	bool Close();
-	bool Open(const char * fn);
+	bool Open(const char *fn);
 
 	int GetWidth() { return m_pDirectXWrapper->GetWidth(); }
 	int GetHeight() { return m_pDirectXWrapper->GetHeight(); }
@@ -22,10 +22,14 @@ public:
 	int GetFPS() { return m_iFPS; }
 	void SetFPS(int iFPS);
 	
+	HBITMAP Capture() { return m_pDirectXWrapper->Capture(); }
+
 	void OnDestroy();
 	void OnUpdate(double deltaTime);
-	HBITMAP OnRender(double deltaTime);
+	void OnRender(double deltaTime);
 protected:
+	void UpdateKeyboard();
+
 	int LuaGetWidth(lua_State *L);
 	int LuaGetHeight(lua_State *L);
 	int LuaGetFPS(lua_State *L);
@@ -34,8 +38,10 @@ protected:
 	int LuaGetDisplayHeight(lua_State *L);
 	int LuaGetDisplayFrequency(lua_State *L);
 	int LuaLoadImage(lua_State *L);
+	int LuaReleaseImage(lua_State *L);
 	int LuaDrawSprite(lua_State *L);
 	int LuaLoadFont(lua_State *L);
+	int LuaReleaseFont(lua_State *L);
 	int LuaDrawText(lua_State *L);
 	int LuaLoadSound(lua_State *L);
 	int LuaPlaySound(lua_State *L);

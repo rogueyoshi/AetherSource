@@ -2,18 +2,38 @@
 #include "Guids.h"
 #include "guicon.h"
 
-CUnknown * WINAPI CFilter::CreateInstance(IUnknown *pUnk, HRESULT *pHr)
+CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
+	: CSource(NAME("Filter"), pUnk, CLSID_Filter)
 {
-	CFilter *pFilter = new CFilter(pUnk, pHr);
+	// The pin magically adds itself to our pin array.
+	//m_pPin = new CPin(pHr, this);
+	new CPin(pHr, this);
 	if (pHr)
 	{
-		if (pFilter == NULL)
-			*pHr = E_OUTOFMEMORY;
+		/*if (m_pPin == NULL)
+		*pHr = E_OUTOFMEMORY;
 		else
-			*pHr = S_OK;
+		*pHr = S_OK;*/
+
+		*pHr = S_OK;
+
+		for (int i = 0; i < m_iPins; i++)
+		{
+			if (m_paStreams[i] == NULL) *pHr = E_OUTOFMEMORY;
+		}
+	}
+}
+
+CFilter::~CFilter()
+{
+	//delete m_pPin;
+
+	for (int i = 0; i < m_iPins; i++)
+	{
+		delete m_paStreams[i];
 	}
 
-	return pFilter;
+	m_iPins = 0;
 }
 
 STDMETHODIMP CFilter::Run(REFERENCE_TIME tStart)
@@ -69,37 +89,3 @@ HRESULT CFilter::GetState(DWORD dw, FILTER_STATE *pState)
 	else
 		return CSource::QueryInterface(riid, ppv);
 }*/
-
-CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
-	: CSource(NAME("Filter"), pUnk, CLSID_Filter)
-{
-	// The pin magically adds itself to our pin array.
-	//m_pPin = new CPin(pHr, this);
-	new CPin(pHr, this);
-	if (pHr)
-	{
-		/*if (m_pPin == NULL)
-		*pHr = E_OUTOFMEMORY;
-		else
-		*pHr = S_OK;*/
-
-		*pHr = S_OK;
-
-		for (int i = 0; i < m_iPins; i++)
-		{
-			if (m_paStreams[i] == NULL) *pHr = E_OUTOFMEMORY;
-		}
-	}
-}
-
-CFilter::~CFilter()
-{
-	//delete m_pPin;
-
-	for (int i = 0; i < m_iPins; i++)
-	{
-		delete m_paStreams[i];
-	}
-
-	m_iPins = 0;
-}

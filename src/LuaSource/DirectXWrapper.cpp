@@ -1,10 +1,12 @@
 #include <algorithm>
 #define NOMINMAX
 
+#include <stdlib.h>
 #include <wincodec.h>
 #include <DirectXColors.h>
 
 #include "DirectXWrapper.h"
+#include "StringHelper.h"
 #include "SimpleMath.h"
 #include "WICTextureLoader.h"
 #include "ScreenGrab.h"
@@ -26,9 +28,11 @@ namespace DX
 	}
 }
 
+HHOOK CDirectXWrapper::m_hHook = NULL;
+
 CDirectXWrapper::CDirectXWrapper() :
-	m_iWidth(1),
-	m_iHeight(1),
+	m_iWidth(MINIMUM_WIDTH),
+	m_iHeight(MINIMUM_HEIGHT),
 	textureFormat(DXGI_FORMAT_B8G8R8A8_UNORM), //DXGI_FORMAT_R8G8B8A8_UNORM
 	depthStencilFormat(DXGI_FORMAT_D24_UNORM_S8_UINT)
 {
@@ -36,11 +40,41 @@ CDirectXWrapper::CDirectXWrapper() :
 	CreateResources();
 
 	m_spriteBatch = std::make_unique<SpriteBatch>(m_d3dContext.Get());
+
+	m_keyboard = std::make_unique<Keyboard>();
+	m_gamePad = std::make_unique<GamePad>();
+
+	// Install hooks and create Windows messaging thread.
+	// TODO: Figure out why this isn't fully working.
+	m_pHookThread = new std::thread([]() {
+		m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT {
+			switch (message)
+			{
+			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
+			case WM_KEYUP:
+			case WM_SYSKEYUP:
+				Keyboard::ProcessMessage(message, wParam, lParam);
+				break;
+			}
+
+			return CallNextHookEx(m_hHook, message, wParam, lParam);
+		}, NULL, 0);
+
+		MSG msg;
+		while (GetMessage(&msg, NULL, 0, 0));
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	});
+	m_pHookThread->detach();
 }
 
 CDirectXWrapper::~CDirectXWrapper()
 {
-
+	UnhookWindowsHookEx(m_hHook);
+	delete m_pHookThread;
 }
 
 void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
@@ -57,37 +91,52 @@ void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
 	if (bChanged) CreateResources();
 }
 
-int CDirectXWrapper::LoadImage(const wchar_t * filePath)
+Image CDirectXWrapper::LoadImage(const wchar_t * filePath)
 {
-	ComPtr<ID3D11ShaderResourceView> texture;
+	Image texture;
 	DX::ThrowIfFailed(
-		CreateWICTextureFromFile(m_d3dDevice.Get(), filePath, nullptr, texture.ReleaseAndGetAddressOf())
+		CreateWICTextureFromFile(m_d3dDevice.Get(), filePath, nullptr, &texture)
 	);
 
-	m_sprites.push_back(texture);
-
-	return m_sprites.size() - 1;
+	return texture;
 }
 
-void CDirectXWrapper::DeleteImage(int index)
+void CDirectXWrapper::ReleaseImage(Image image)
 {
-	m_sprites.erase(m_sprites.begin() + index);
+	image->Release();
+	delete image;
 }
 
-void CDirectXWrapper::BeginSpriteBatch()
+void CDirectXWrapper::DrawSprite(Image image, float xPosition, float yPosition)
 {
-	m_spriteBatch->Begin(SpriteSortMode_Deferred, m_commonStates->NonPremultiplied());
+	m_spriteBatch->Draw(image, Vector2{ xPosition, yPosition });
 }
 
-void CDirectXWrapper::EndSpriteBatch()
+Font CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
 {
-	m_spriteBatch->End();
+	Font font;
+	m_fw1FontFactory->CreateFontWrapper(m_d3dDevice.Get(), fontFamily, &font);
+
+	return font;
 }
 
-void CDirectXWrapper::DrawSprite(int index, float xPosition, float yPosition)
+void CDirectXWrapper::ReleaseFont(Font font)
 {
-	m_spriteBatch->Draw(m_sprites.at(index).Get(), Vector2{ xPosition, yPosition });
+	font->Release();
+	delete font;
 }
+
+void CDirectXWrapper::DrawText(const WCHAR *text, Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
+{
+	font->DrawString(
+		m_d3dContext.Get(),
+		text, // String
+		size, // Font size
+		x, // X position
+		y, // Y position
+		color, // Text color, 0xAaBbGgRr
+		FW1_RESTORESTATE); // Flags (for example FW1_RESTORESTATE to keep context states unchanged)
+};
 
 void CDirectXWrapper::Clear()
 {
@@ -103,20 +152,22 @@ void CDirectXWrapper::Clear()
 	m_d3dContext->RSSetViewports(1, &m_viewport);
 }
 
-void CDirectXWrapper::Flush()
+void CDirectXWrapper::BeginSpriteBatch()
+{
+	m_spriteBatch->Begin(SpriteSortMode_Deferred, m_commonStates->NonPremultiplied());
+}
+
+void CDirectXWrapper::EndSpriteBatch()
+{
+	m_spriteBatch->End();
+}
+
+void CDirectXWrapper::Render()
 {
 	m_d3dContext->Flush();
 }
 
-void CDirectXWrapper::Screenshot()
-{
-	DX::ThrowIfFailed(
-		SaveWICTextureToFile(m_d3dContext.Get(), m_texture.Get(), GUID_ContainerFormatPng, L"Screenshot.png")
-	);
-}
-
-// TODO: Isolate and fix the leak in this function.
-// TODO: Figure out why the alpha channel is not reflected in the outgoing pData
+// TODO: Figure out why the alpha channel is not reflected in the outgoing bitmap.
 HBITMAP CDirectXWrapper::Capture()
 {
 	D3D11_TEXTURE2D_DESC textureDesc = m_textureDesc;
@@ -130,14 +181,14 @@ HBITMAP CDirectXWrapper::Capture()
 		m_d3dDevice->CreateTexture2D(&textureDesc, nullptr, texture.ReleaseAndGetAddressOf())
 	);
 	m_d3dContext->CopyResource(texture.Get(), m_texture.Get());
-	
+
 	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
 	m_d3dContext->Map(texture.Get(), D3D11CalcSubresource(0, 0, 0), D3D11_MAP_READ_WRITE, 0, &mappedSubresource);
-	
+
 	// Copy subresource data to buffer.
 	static std::vector<uint8_t> image_buffer;
 	image_buffer.resize(textureDesc.Width * textureDesc.Height * 4);
-	uint8_t *source = reinterpret_cast<uint8_t*>(mappedSubresource.pData);
+	uint8_t *source = reinterpret_cast<uint8_t *>(mappedSubresource.pData);
 	uint8_t* destination = image_buffer.data();
 	size_t size = std::min<size_t>(textureDesc.Width * 4, mappedSubresource.RowPitch);
 
@@ -159,6 +210,13 @@ HBITMAP CDirectXWrapper::Capture()
 	return hBitmap;
 }
 
+void CDirectXWrapper::Screenshot(LPCWSTR fileName)
+{
+	DX::ThrowIfFailed(
+		SaveWICTextureToFile(m_d3dContext.Get(), m_texture.Get(), GUID_ContainerFormatPng, fileName)
+	);
+}
+
 void CDirectXWrapper::CreateDevice()
 {
 	DX::ThrowIfFailed(
@@ -176,6 +234,8 @@ void CDirectXWrapper::CreateDevice()
 	);
 
 	m_commonStates = std::make_unique<CommonStates>(m_d3dDevice.Get());
+
+	FW1CreateFactory(FW1_VERSION, &m_fw1FontFactory);
 }
 
 void CDirectXWrapper::CreateResources()

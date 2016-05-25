@@ -99,7 +99,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\robot\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;_DEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
@@ -118,15 +118,16 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <ImportLibrary />
-      <AdditionalDependencies>notelemetry.obj;winmm.lib;d3d11.lib;dxguid.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>notelemetry.obj;winmm.lib;d3d11.lib;dxguid.lib;uuid.lib;%(AdditionalDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
     <ResourceCompile />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;NDEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -147,11 +148,12 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ImportLibrary>
       </ImportLibrary>
-      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>No</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
     <ResourceCompile />
@@ -161,7 +163,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
@@ -178,9 +180,10 @@
       <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
       <TargetMachine>MachineX64</TargetMachine>
       <ImportLibrary />
-      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
     <ResourceCompile />
@@ -190,7 +193,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Src;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;NDEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -209,12 +212,13 @@
       <TargetMachine>MachineX64</TargetMachine>
       <ImportLibrary>
       </ImportLibrary>
-      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>No</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
     <ResourceCompile />

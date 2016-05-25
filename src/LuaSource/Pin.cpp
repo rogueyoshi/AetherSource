@@ -281,7 +281,7 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 	CheckPointer(pSample, E_POINTER);
 
 	/*IUnknown *pUnknown = GetOwner();
-	CPushSource *pOwner = (CPushSource *)&pUnknown;
+	CFilter *pOwner = (CFilter *)&pUnknown;
 	FILTER_STATE state;
 	pOwner->GetState(INFINITE, &state);
 
@@ -305,29 +305,24 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 
 	VIDEOINFOHEADER *pVih = (VIDEOINFOHEADER *)m_mt.pbFormat;
 
-	// Update from Lua
-	static DWORD previousTime = GetCurrentTime();
+	// Update and Render from Lua
 	DWORD currentTime = GetCurrentTime();
-	m_pLuaWrapper->OnUpdate((currentTime - previousTime) * 0.001);
+	static DWORD previousTime = currentTime;
+	double deltaTime = (currentTime - previousTime) * 0.001;
+	m_pLuaWrapper->OnUpdate(deltaTime);
+	m_pLuaWrapper->OnRender(deltaTime);
+
+	// Capture output from Lua's DirectX instance
+	HBITMAP hBitmap = m_pLuaWrapper->Capture();
 
 	// Copy the DIB bits over into our filter's output buffer.
 	// Since sample size may be larger than the image size, bound the copy size.
 	//int nSize = min(pVih->bmiHeader.biSizeImage, (DWORD)cbData);
-
-	// Screen mirror dummy for now
-	//HBITMAP hBitmap = CopyScreenToBitmap(&m_rScreen, pData, (BITMAPINFO *)&(pVih->bmiHeader));
-
-	// Render from Lua and copy bitmap into provided buffer
-	currentTime = GetCurrentTime();
-	HBITMAP hBitmap = m_pLuaWrapper->OnRender((currentTime - previousTime) * 0.001);
 	HDC hDC = GetDC(NULL);
 	GetDIBits(hDC, hBitmap, 0, m_pLuaWrapper->GetHeight(), pData, (BITMAPINFO *)&(pVih->bmiHeader), DIB_RGB_COLORS);
-
-	// Erase handle and release DC
+	ReleaseDC(NULL, hDC);
 
 	if (hBitmap) DeleteObject(hBitmap);
-
-	ReleaseDC(NULL, hDC);
 
 	// Set the timestamps that will govern playback frame rate.
 	// If this file is getting written out as an AVI,
@@ -492,13 +487,13 @@ HRESULT STDMETHODCALLTYPE CPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE **pMt, B
 
 // Get: Return the pin category (our only property). 
 HRESULT CPin::Get(
-	REFGUID guidPropSet,   // Which property set.
-	DWORD dwPropID,        // Which property in that set.
-	void *pInstanceData,   // Instance data (ignore).
-	DWORD cbInstanceData,  // Size of the instance data (ignore).
-	void *pPropData,       // Buffer to receive the property data.
-	DWORD cbPropData,      // Size of the buffer.
-	DWORD *pcbReturned     // Return the size of the property.
+	REFGUID guidPropSet, // Which property set.
+	DWORD dwPropID, // Which property in that set.
+	void *pInstanceData, // Instance data (ignore).
+	DWORD cbInstanceData, // Size of the instance data (ignore).
+	void *pPropData, // Buffer to receive the property data.
+	DWORD cbPropData, // Size of the buffer.
+	DWORD *pcbReturned // Return the size of the property.
 )
 {
 	if (guidPropSet != AMPROPSETID_Pin)             return E_PROP_SET_UNSUPPORTED;
@@ -531,6 +526,7 @@ HRESULT CPin::QuerySupported(REFGUID guidPropSet, DWORD dwPropID, DWORD *pTypeSu
 {
 	if (guidPropSet != AMPROPSETID_Pin) return E_PROP_SET_UNSUPPORTED;
 	if (dwPropID != AMPROPERTY_PIN_CATEGORY) return E_PROP_ID_UNSUPPORTED;
+
 	// We support getting this property, but not setting it.
 	if (pTypeSupport) *pTypeSupport = KSPROPERTY_SUPPORT_GET;
 

@@ -58,7 +58,7 @@
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
     <None Include="LuaSource.def">
-      <Filter>Definition Files</Filter>
+      <Filter>Module Definition Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -74,7 +74,7 @@
       <UniqueIdentifier>{26ec295e-48cd-4299-89aa-12c6c5696e79}</UniqueIdentifier>
       <Extensions>rc</Extensions>
     </Filter>
-    <Filter Include="Definition Files">
+    <Filter Include="Module Definition Files">
       <UniqueIdentifier>{e2832cd1-9693-4bb5-8480-c580fcf61563}</UniqueIdentifier>
       <Extensions>def</Extensions>
     </Filter>
