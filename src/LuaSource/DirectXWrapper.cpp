@@ -104,7 +104,7 @@ Image CDirectXWrapper::LoadImage(const wchar_t * filePath)
 void CDirectXWrapper::ReleaseImage(Image image)
 {
 	image->Release();
-	delete image;
+	//delete image;
 }
 
 void CDirectXWrapper::DrawSprite(Image image, float xPosition, float yPosition)
@@ -123,7 +123,7 @@ Font CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
 void CDirectXWrapper::ReleaseFont(Font font)
 {
 	font->Release();
-	delete font;
+	//delete font;
 }
 
 void CDirectXWrapper::DrawText(const WCHAR *text, Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
