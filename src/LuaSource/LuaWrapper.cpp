@@ -1,6 +1,7 @@
 #include <algorithm>
 #define NOMINMAX
 
+//#include <functional>
 #include "LuaWrapper.h"
 #include "StringHelper.h"
 
@@ -61,6 +62,10 @@ bool CLuaWrapper::Open(const char *fn)
 
 	m_pLuaState = luaL_newstate();
 	luaL_openlibs(m_pLuaState);
+
+	// TODO: use std::bind to register lua functions and remove the wrapper.
+	//lua_pushcclosure(m_pLuaState, std::bind(&CLuaWrapper::LuaGetDisplayWidth, this, std::placeholders::_1), 0);
+	//lua_setglobal(m_pLuaState, "GetDisplayWidth");
 
 	*static_cast<CLuaWrapper**>(lua_getextraspace(m_pLuaState)) = this;
 	

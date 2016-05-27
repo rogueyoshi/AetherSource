@@ -48,26 +48,26 @@ protected:
 	int m_iWidth;
 	int m_iHeight;
 
-	void CreateDevice();
-	void CreateResources();
-
 	// Windows
 	static HHOOK m_hHook;
-	std::thread *m_pHookThread;
+	static std::thread *m_pHookThread;
 
 	// DirectX
 	D3D_FEATURE_LEVEL m_featureLevel;
 	ComPtr<ID3D11Device> m_d3dDevice;
 	ComPtr<ID3D11DeviceContext> m_d3dContext;
-	DXGI_FORMAT textureFormat;
-	CD3D11_TEXTURE2D_DESC m_textureDesc;
-	ComPtr<ID3D11Texture2D> m_texture;
+
+	DXGI_FORMAT renderTargetFormat;
+	CD3D11_TEXTURE2D_DESC m_renderTargetDesc;
+	ComPtr<ID3D11Texture2D> m_renderTarget;
 	ComPtr<ID3D11RenderTargetView> m_renderTargetView;
+
 	DXGI_FORMAT depthStencilFormat;
 	CD3D11_TEXTURE2D_DESC depthStencilDesc;
 	ComPtr<ID3D11Texture2D> depthStencil;
 	CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ComPtr<ID3D11DepthStencilView> m_depthStencilView;
+
 	CD3D11_VIEWPORT m_viewport;
 
 	// DirectX Tool Kit
@@ -77,5 +77,9 @@ protected:
 	std::unique_ptr<GamePad> m_gamePad;
 
 	// FW1 Font Wrapper
-	IFW1Factory *m_fw1FontFactory;
+	ComPtr<IFW1Factory> m_fw1FontFactory;
+
+	void CreateDevice();
+	void CreateResources();
+	void Hook();
 };

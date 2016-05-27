@@ -45,7 +45,7 @@ function OnRender(deltaTime)
 	
 	DrawText
 	{
-		text = 'Hello World',
+		text = 'Hello, world!',
 		font = font,
 		size = 128,
 		x = 100,

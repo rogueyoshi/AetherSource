@@ -33,7 +33,7 @@ HHOOK CDirectXWrapper::m_hHook = NULL;
 CDirectXWrapper::CDirectXWrapper() :
 	m_iWidth(MINIMUM_WIDTH),
 	m_iHeight(MINIMUM_HEIGHT),
-	textureFormat(DXGI_FORMAT_B8G8R8A8_UNORM), //DXGI_FORMAT_R8G8B8A8_UNORM
+	renderTargetFormat(DXGI_FORMAT_B8G8R8A8_UNORM), //DXGI_FORMAT_R8G8B8A8_UNORM
 	depthStencilFormat(DXGI_FORMAT_D24_UNORM_S8_UINT)
 {
 	CreateDevice();
@@ -44,30 +44,9 @@ CDirectXWrapper::CDirectXWrapper() :
 	m_keyboard = std::make_unique<Keyboard>();
 	m_gamePad = std::make_unique<GamePad>();
 
-	// Install hooks and create Windows messaging thread.
-	// TODO: Figure out why this isn't fully working.
-	m_pHookThread = new std::thread([]() {
-		m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT {
-			switch (message)
-			{
-			case WM_KEYDOWN:
-			case WM_SYSKEYDOWN:
-			case WM_KEYUP:
-			case WM_SYSKEYUP:
-				Keyboard::ProcessMessage(message, wParam, lParam);
-				break;
-			}
+	FW1CreateFactory(FW1_VERSION, m_fw1FontFactory.ReleaseAndGetAddressOf());
 
-			return CallNextHookEx(m_hHook, message, wParam, lParam);
-		}, NULL, 0);
-
-		MSG msg;
-		while (GetMessage(&msg, NULL, 0, 0));
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	});
+	m_pHookThread = new std::thread(&Hook);
 	m_pHookThread->detach();
 }
 
@@ -170,7 +149,7 @@ void CDirectXWrapper::Render()
 // TODO: Figure out why the alpha channel is not reflected in the outgoing bitmap.
 HBITMAP CDirectXWrapper::Capture()
 {
-	D3D11_TEXTURE2D_DESC textureDesc = m_textureDesc;
+	D3D11_TEXTURE2D_DESC textureDesc = m_renderTargetDesc;
 	textureDesc.Usage = D3D11_USAGE_STAGING;
 	textureDesc.BindFlags = 0;
 	textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
@@ -180,16 +159,16 @@ HBITMAP CDirectXWrapper::Capture()
 	DX::ThrowIfFailed(
 		m_d3dDevice->CreateTexture2D(&textureDesc, nullptr, texture.ReleaseAndGetAddressOf())
 	);
-	m_d3dContext->CopyResource(texture.Get(), m_texture.Get());
+	m_d3dContext->CopyResource(texture.Get(), m_renderTarget.Get());
 
 	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
 	m_d3dContext->Map(texture.Get(), D3D11CalcSubresource(0, 0, 0), D3D11_MAP_READ_WRITE, 0, &mappedSubresource);
 
 	// Copy subresource data to buffer.
-	static std::vector<uint8_t> image_buffer;
-	image_buffer.resize(textureDesc.Width * textureDesc.Height * 4);
+	static std::vector<uint8_t> buffer;
+	buffer.resize(textureDesc.Width * textureDesc.Height * 4);
 	uint8_t *source = reinterpret_cast<uint8_t *>(mappedSubresource.pData);
-	uint8_t* destination = image_buffer.data();
+	uint8_t* destination = buffer.data();
 	size_t size = std::min<size_t>(textureDesc.Width * 4, mappedSubresource.RowPitch);
 
 	for (size_t h = 0; h < textureDesc.Height; h++)
@@ -213,7 +192,7 @@ HBITMAP CDirectXWrapper::Capture()
 void CDirectXWrapper::Screenshot(LPCWSTR fileName)
 {
 	DX::ThrowIfFailed(
-		SaveWICTextureToFile(m_d3dContext.Get(), m_texture.Get(), GUID_ContainerFormatPng, fileName)
+		SaveWICTextureToFile(m_d3dContext.Get(), m_renderTarget.Get(), GUID_ContainerFormatPng, fileName)
 	);
 }
 
@@ -234,8 +213,6 @@ void CDirectXWrapper::CreateDevice()
 	);
 
 	m_commonStates = std::make_unique<CommonStates>(m_d3dDevice.Get());
-
-	FW1CreateFactory(FW1_VERSION, &m_fw1FontFactory);
 }
 
 void CDirectXWrapper::CreateResources()
@@ -246,13 +223,13 @@ void CDirectXWrapper::CreateResources()
 	m_depthStencilView.Reset();
 	m_d3dContext->Flush();
 
-	m_textureDesc = CD3D11_TEXTURE2D_DESC(textureFormat, m_iWidth, m_iHeight, 1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
-	m_textureDesc.MiscFlags = 0;
+	m_renderTargetDesc = CD3D11_TEXTURE2D_DESC(renderTargetFormat, m_iWidth, m_iHeight, 1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+	m_renderTargetDesc.MiscFlags = 0;
 	DX::ThrowIfFailed(
-		m_d3dDevice->CreateTexture2D(&m_textureDesc, nullptr, m_texture.GetAddressOf())
+		m_d3dDevice->CreateTexture2D(&m_renderTargetDesc, nullptr, m_renderTarget.GetAddressOf())
 	);
 	DX::ThrowIfFailed(
-		m_d3dDevice->CreateRenderTargetView(m_texture.Get(), nullptr, m_renderTargetView.ReleaseAndGetAddressOf())
+		m_d3dDevice->CreateRenderTargetView(m_renderTarget.Get(), nullptr, m_renderTargetView.ReleaseAndGetAddressOf())
 	);
 
 	depthStencilDesc = CD3D11_TEXTURE2D_DESC(depthStencilFormat, m_iWidth, m_iHeight, 1, 1, D3D11_BIND_DEPTH_STENCIL);
@@ -260,4 +237,31 @@ void CDirectXWrapper::CreateResources()
 
 	depthStencilViewDesc = CD3D11_DEPTH_STENCIL_VIEW_DESC(D3D11_DSV_DIMENSION_TEXTURE2D);
 	DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(depthStencil.Get(), &depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
+}
+
+// Install hooks and create Windows messenging thread.
+void CDirectXWrapper::Hook()
+{
+	HOOKPROC hookProc = [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT {
+		switch (message)
+		{
+		case WM_KEYDOWN:
+		case WM_SYSKEYDOWN:
+		case WM_KEYUP:
+		case WM_SYSKEYUP:
+			Keyboard::ProcessMessage(message, wParam, lParam);
+			break;
+		}
+
+		return CallNextHookEx(m_hHook, message, wParam, lParam);
+	};
+	m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, hookProc, NULL, 0);
+
+	// Message loop.
+	MSG msg;
+	while (GetMessage(&msg, NULL, 0, 0));
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 }
