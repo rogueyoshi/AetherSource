@@ -57,15 +57,15 @@ protected:
 	ComPtr<ID3D11Device> m_d3dDevice;
 	ComPtr<ID3D11DeviceContext> m_d3dContext;
 
-	DXGI_FORMAT renderTargetFormat;
+	DXGI_FORMAT m_renderTargetFormat;
 	CD3D11_TEXTURE2D_DESC m_renderTargetDesc;
 	ComPtr<ID3D11Texture2D> m_renderTarget;
 	ComPtr<ID3D11RenderTargetView> m_renderTargetView;
 
-	DXGI_FORMAT depthStencilFormat;
-	CD3D11_TEXTURE2D_DESC depthStencilDesc;
-	ComPtr<ID3D11Texture2D> depthStencil;
-	CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	DXGI_FORMAT m_depthStencilFormat;
+	CD3D11_TEXTURE2D_DESC m_depthStencilDesc;
+	ComPtr<ID3D11Texture2D> m_depthStencil;
+	CD3D11_DEPTH_STENCIL_VIEW_DESC m_depthStencilViewDesc;
 	ComPtr<ID3D11DepthStencilView> m_depthStencilView;
 
 	CD3D11_VIEWPORT m_viewport;

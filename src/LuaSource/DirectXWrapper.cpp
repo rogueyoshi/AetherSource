@@ -33,8 +33,8 @@ HHOOK CDirectXWrapper::m_hHook = NULL;
 CDirectXWrapper::CDirectXWrapper() :
 	m_iWidth(MINIMUM_WIDTH),
 	m_iHeight(MINIMUM_HEIGHT),
-	renderTargetFormat(DXGI_FORMAT_B8G8R8A8_UNORM), //DXGI_FORMAT_R8G8B8A8_UNORM
-	depthStencilFormat(DXGI_FORMAT_D24_UNORM_S8_UINT)
+	m_renderTargetFormat(DXGI_FORMAT_B8G8R8A8_UNORM), //DXGI_FORMAT_R8G8B8A8_UNORM
+	m_depthStencilFormat(DXGI_FORMAT_D24_UNORM_S8_UINT)
 {
 	CreateDevice();
 	CreateResources();
@@ -247,7 +247,7 @@ void CDirectXWrapper::CreateResources()
 	m_depthStencilView.Reset();
 	m_d3dContext->Flush();
 
-	m_renderTargetDesc = CD3D11_TEXTURE2D_DESC(renderTargetFormat, m_iWidth, m_iHeight, 1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+	m_renderTargetDesc = CD3D11_TEXTURE2D_DESC(m_renderTargetFormat, m_iWidth, m_iHeight, 1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
 	m_renderTargetDesc.MiscFlags = 0;
 	DX::ThrowIfFailed(
 		m_d3dDevice->CreateTexture2D(&m_renderTargetDesc, nullptr, m_renderTarget.GetAddressOf())
@@ -256,9 +256,9 @@ void CDirectXWrapper::CreateResources()
 		m_d3dDevice->CreateRenderTargetView(m_renderTarget.Get(), nullptr, m_renderTargetView.ReleaseAndGetAddressOf())
 	);
 
-	depthStencilDesc = CD3D11_TEXTURE2D_DESC(depthStencilFormat, m_iWidth, m_iHeight, 1, 1, D3D11_BIND_DEPTH_STENCIL);
-	DX::ThrowIfFailed(m_d3dDevice->CreateTexture2D(&depthStencilDesc, nullptr, depthStencil.GetAddressOf()));
+	m_depthStencilDesc = CD3D11_TEXTURE2D_DESC(m_depthStencilFormat, m_iWidth, m_iHeight, 1, 1, D3D11_BIND_DEPTH_STENCIL);
+	DX::ThrowIfFailed(m_d3dDevice->CreateTexture2D(&m_depthStencilDesc, nullptr, m_depthStencil.GetAddressOf()));
 
-	depthStencilViewDesc = CD3D11_DEPTH_STENCIL_VIEW_DESC(D3D11_DSV_DIMENSION_TEXTURE2D);
-	DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(depthStencil.Get(), &depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
+	m_depthStencilViewDesc = CD3D11_DEPTH_STENCIL_VIEW_DESC(D3D11_DSV_DIMENSION_TEXTURE2D);
+	DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &m_depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
 }
