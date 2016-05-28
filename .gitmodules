@@ -1,0 +1,3 @@
+[submodule "src/DirectXTK"]
+	path = src/DirectXTK
+	url = https://github.com/AetherMachine/DirectXTK.git
