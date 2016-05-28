@@ -50,7 +50,7 @@ protected:
 
 	// Windows
 	static HHOOK m_hHook;
-	static std::thread *m_pHookThread;
+	std::thread *m_pHookThread;
 
 	// DirectX
 	D3D_FEATURE_LEVEL m_featureLevel;
@@ -81,5 +81,4 @@ protected:
 
 	void CreateDevice();
 	void CreateResources();
-	void Hook();
 };
