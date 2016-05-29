@@ -81,4 +81,6 @@ protected:
 
 	void CreateDevice();
 	void CreateResources();
+
+	void Hook();
 };

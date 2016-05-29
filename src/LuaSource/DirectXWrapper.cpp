@@ -47,30 +47,7 @@ CDirectXWrapper::CDirectXWrapper() :
 	FW1CreateFactory(FW1_VERSION, m_fw1FontFactory.ReleaseAndGetAddressOf());
 
 	// Install hooks and create Windows messenging thread.
-	m_pHookThread = new std::thread([]() {
-		HOOKPROC hookProc = [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT {
-			switch (message)
-			{
-			case WM_KEYDOWN:
-			case WM_SYSKEYDOWN:
-			case WM_KEYUP:
-			case WM_SYSKEYUP:
-				Keyboard::ProcessMessage(message, wParam, lParam);
-				break;
-			}
-
-			return CallNextHookEx(m_hHook, message, wParam, lParam);
-		};
-		m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, hookProc, NULL, 0);
-
-		// Message loop.
-		MSG msg;
-		while (GetMessage(&msg, NULL, 0, 0));
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	});
+	m_pHookThread = new std::thread(&CDirectXWrapper::Hook, this);
 	m_pHookThread->detach();
 }
 
@@ -261,4 +238,29 @@ void CDirectXWrapper::CreateResources()
 
 	m_depthStencilViewDesc = CD3D11_DEPTH_STENCIL_VIEW_DESC(D3D11_DSV_DIMENSION_TEXTURE2D);
 	DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &m_depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
+}
+
+void CDirectXWrapper::Hook()
+{
+	m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT {
+		switch (message)
+		{
+		case WM_KEYDOWN:
+		case WM_SYSKEYDOWN:
+		case WM_KEYUP:
+		case WM_SYSKEYUP:
+			Keyboard::ProcessMessage(message, wParam, lParam);
+			break;
+		}
+
+		return CallNextHookEx(m_hHook, message, wParam, lParam);
+	}, NULL, 0);
+
+	// Message loop.
+	MSG msg;
+	while (GetMessage(&msg, NULL, 0, 0));
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 }
