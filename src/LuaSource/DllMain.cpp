@@ -4,8 +4,8 @@
 const AMOVIESETUP_MEDIATYPE g_MediaTypeSetup =
 {
 	&MEDIATYPE_Video,  // Major type
-	//&MEDIASUBTYPE_ARGB32 // Minor type
-	&MEDIASUBTYPE_NULL // Minor type
+					   //&MEDIASUBTYPE_ARGB32 // Minor type
+					   &MEDIASUBTYPE_NULL // Minor type
 };
 
 const AMOVIESETUP_PIN g_PinSetup =
@@ -37,19 +37,20 @@ CFactoryTemplate g_Templates[] =
 		NAME(PROJECT_NAME), // Name
 		&CLSID_Filter, // CLSID
 		[](IUnknown *pUnk, HRESULT *pHr) -> CUnknown * { // Method to create an instance of LuaSource
-			CFilter *pFilter = new CFilter(pUnk, pHr);
-			if (pHr)
-			{
-				if (pFilter == NULL)
-					*pHr = E_OUTOFMEMORY;
-				else
-					*pHr = S_OK;
-			}
+		CFilter *pFilter = new CFilter(pUnk, pHr);
 
-			return pFilter;
-		},
-		NULL, // Initialization function
-		&g_FilterSetup // Set-up information (for filters)
+		if (pHr)
+		{
+			if (pFilter == NULL)
+				*pHr = E_OUTOFMEMORY;
+			else
+				*pHr = S_OK;
+		}
+
+	return pFilter;
+},
+NULL, // Initialization function
+&g_FilterSetup // Set-up information (for filters)
 	}
 };
 

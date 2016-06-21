@@ -5,6 +5,11 @@
 CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
 	: CSource(NAME("Filter"), pUnk, CLSID_Filter)
 {
+	redirectIOToConsole();
+	//EnableMenuItem(GetConsoleWindow(), SC_CLOSE, MF_GRAYED);
+	RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
+	SetConsoleTitle(TEXT(PROJECT_NAME));
+
 	// The pin magically adds itself to our pin array.
 	//m_pPin = new CPin(pHr, this);
 	new CPin(pHr, this);
@@ -34,17 +39,15 @@ CFilter::~CFilter()
 	}
 
 	m_iPins = 0;
+
+	// Deallocate console
+	ShowWindow(GetConsoleWindow(), SW_HIDE);
+	FreeConsole();
 }
 
 STDMETHODIMP CFilter::Run(REFERENCE_TIME tStart)
 {
 	CAutoLock autoLock(m_pLock);
-
-	// Allocate a console window and pipe IO to it
-	redirectIOToConsole();
-	//EnableMenuItem(GetConsoleWindow(), SC_CLOSE, MF_GRAYED);
-	RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
-	SetConsoleTitle(TEXT(PROJECT_NAME));
 
 	return CSource::Run(tStart);
 }
@@ -61,10 +64,6 @@ STDMETHODIMP CFilter::Stop()
 		CPin *pPin = (CPin *)&m_paStreams[i];
 		pPin->resetResources();
 	}
-
-	// Deallocate console
-	ShowWindow(GetConsoleWindow(), SW_HIDE);
-	FreeConsole();
 
 	return CSource::Stop();
 }

@@ -73,7 +73,7 @@ void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
 	if (bChanged) CreateResources();
 }
 
-Image CDirectXWrapper::LoadImage(const wchar_t * filePath)
+Image CDirectXWrapper::LoadImage(const wchar_t *filePath)
 {
 	Image texture;
 	DX::ThrowIfFailed(
@@ -261,8 +261,13 @@ void CDirectXWrapper::Hook()
 		return CallNextHookEx(m_hHook, nCode, wParam, lParam);
 	}, NULL, 0);
 
-	if (m_hHook == NULL) {
-		std::cout << "Keyboard hook failed!" << std::endl;
+	if (m_hHook == NULL)
+	{
+		std::wcout << "Keyboard hook failed!" << std::endl;
+	}
+	else
+	{
+		std::wcout << "Keyboard hooked!" << std::endl;
 	}
 
 	while (GetMessage(NULL, NULL, 0, 0));

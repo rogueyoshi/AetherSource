@@ -45,12 +45,12 @@ public:
 	HBITMAP Capture();
 	void Screenshot(LPCWSTR fileName);
 protected:
-	int m_iWidth;
-	int m_iHeight;
-
 	// Windows
 	static HHOOK m_hHook;
 	static std::thread *m_pHookThread;
+
+	int m_iWidth;
+	int m_iHeight;
 
 	// DirectX
 	D3D_FEATURE_LEVEL m_featureLevel;

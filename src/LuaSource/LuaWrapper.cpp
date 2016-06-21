@@ -148,28 +148,28 @@ void CLuaWrapper::OnRender(double deltaTime)
 
 void CLuaWrapper::UpdateKeyboard()
 {
-	auto keyboard = m_pDirectXWrapper->GetKeyboardState();
+	auto kb = m_pDirectXWrapper->GetKeyboardState();
 
 	lua_newtable(m_pLuaState);
 
 	lua_pushliteral(m_pLuaState, "Shift");
-	lua_pushboolean(m_pLuaState, keyboard.LeftShift || keyboard.RightShift);
+	lua_pushboolean(m_pLuaState, kb.LeftShift || kb.RightShift);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "Control");
-	lua_pushboolean(m_pLuaState, keyboard.LeftControl || keyboard.RightControl);
+	lua_pushboolean(m_pLuaState, kb.LeftControl || kb.RightControl);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "Alt");
-	lua_pushboolean(m_pLuaState, keyboard.LeftAlt || keyboard.RightAlt);
+	lua_pushboolean(m_pLuaState, kb.LeftAlt || kb.RightAlt);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "Windows");
-	lua_pushboolean(m_pLuaState, keyboard.LeftWindows || keyboard.RightWindows);
+	lua_pushboolean(m_pLuaState, kb.LeftWindows || kb.RightWindows);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "A");
-	lua_pushboolean(m_pLuaState, keyboard.A);
+	lua_pushboolean(m_pLuaState, kb.A);
 	lua_settable(m_pLuaState, -3);
 
 	lua_setglobal(m_pLuaState, "Keyboard");
