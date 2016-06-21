@@ -168,8 +168,18 @@ HRESULT CPin::GetMediaType(int iPosition, CMediaType *pMt)
 	// Since we use RGB888 (the default for 32 bit), there is
 	// no reason to use BI_BITFIELDS to specify the RGB
 	// masks. Also, not everything supports BI_BITFIELDS
-	pvi->bmiHeader.biCompression = BI_RGB;
-	pvi->bmiHeader.biBitCount = 32;
+	switch (iPosition)
+	{
+	case 0:
+	case 1:
+		pvi->bmiHeader.biCompression = BI_RGB;
+		pvi->bmiHeader.biBitCount = 32;
+		break;
+	case 2:
+		pvi->bmiHeader.biCompression = BI_RGB;
+		pvi->bmiHeader.biBitCount = 24;
+		break;
+	}
 
 	// Adjust the parameters common to all formats
 	pvi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -456,7 +466,7 @@ HRESULT STDMETHODCALLTYPE CPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE **pMt, B
 	*pMt = CreateMediaType(&m_mt); // a windows lib method, also does a copy for us
 	if (*pMt == NULL) return E_OUTOFMEMORY;
 
-	VIDEO_STREAM_CONFIG_CAPS * pVSCC = (VIDEO_STREAM_CONFIG_CAPS*)(pSCC);
+	VIDEO_STREAM_CONFIG_CAPS *pVSCC = (VIDEO_STREAM_CONFIG_CAPS*)(pSCC);
 
 	/*
 	most of these are listed as deprecated by msdn... yet some still used, apparently. odd.

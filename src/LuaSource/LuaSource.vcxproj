@@ -100,7 +100,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;_DEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";TARGET_FILE_NAME="$(TargetFileName)";WIN32;_WINDOWS;_USRDLL;_DEBUG;NDEBUG;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -128,7 +128,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;NDEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";TARGET_FILE_NAME="$(TargetFileName)";WIN32;_WINDOWS;_USRDLL;NDEBUG;_DEBUG;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -164,7 +164,7 @@
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";TARGET_FILE_NAME="$(TargetFileName)";WIN32;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -194,7 +194,7 @@
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>..\baseclasses;..\lua-5.3.2\src;..\DirectXTK\Inc;..\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";WIN32;_WINDOWS;_USRDLL;NDEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PROJECT_NAME="$(ProjectName)";TARGET_NAME="$(TargetName)";TARGET_FILE_NAME="$(TargetFileName)";WIN32;_WINDOWS;_USRDLL;NDEBUG;_DEBUG;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>

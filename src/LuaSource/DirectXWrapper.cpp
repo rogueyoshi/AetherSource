@@ -1,6 +1,7 @@
 #include <algorithm>
 #define NOMINMAX
 
+#include <iostream>
 #include <stdlib.h>
 #include <wincodec.h>
 #include <DirectXColors.h>
@@ -28,7 +29,8 @@ namespace DX
 	}
 }
 
-HHOOK CDirectXWrapper::m_hHook = NULL;
+HHOOK CDirectXWrapper::m_hHook = nullptr;
+std::thread * CDirectXWrapper::m_pHookThread = nullptr;
 
 CDirectXWrapper::CDirectXWrapper() :
 	m_iWidth(MINIMUM_WIDTH),
@@ -214,7 +216,7 @@ void CDirectXWrapper::CreateDevice()
 	);
 
 	m_commonStates = std::make_unique<CommonStates>(m_d3dDevice.Get());
-}
+}	
 
 void CDirectXWrapper::CreateResources()
 {
@@ -239,28 +241,29 @@ void CDirectXWrapper::CreateResources()
 	m_depthStencilViewDesc = CD3D11_DEPTH_STENCIL_VIEW_DESC(D3D11_DSV_DIMENSION_TEXTURE2D);
 	DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &m_depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
 }
-
+//TODO: fix this so that low level keyboard functions work.
 void CDirectXWrapper::Hook()
 {
-	m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](int message, WPARAM wParam, LPARAM lParam) -> LRESULT {
-		switch (message)
+	m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](const int nCode, const WPARAM wParam, const LPARAM lParam) {
+		switch (wParam)
 		{
+		case WM_ACTIVATEAPP:
+			Keyboard::ProcessMessage(nCode, wParam, lParam);
+			break;
 		case WM_KEYDOWN:
 		case WM_SYSKEYDOWN:
 		case WM_KEYUP:
 		case WM_SYSKEYUP:
-			Keyboard::ProcessMessage(message, wParam, lParam);
+			Keyboard::ProcessMessage(nCode, wParam, lParam);
 			break;
 		}
 
-		return CallNextHookEx(m_hHook, message, wParam, lParam);
+		return CallNextHookEx(m_hHook, nCode, wParam, lParam);
 	}, NULL, 0);
 
-	// Message loop.
-	MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0));
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+	if (m_hHook == NULL) {
+		std::cout << "Keyboard hook failed!" << std::endl;
 	}
+
+	while (GetMessage(NULL, NULL, 0, 0));
 }
