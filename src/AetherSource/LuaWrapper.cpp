@@ -4,6 +4,7 @@
 //#include <functional>
 #include "LuaWrapper.h"
 #include "StringHelper.h"
+#include "../robot/Source/Robot.h"
 
 #define MINIMUM_FPS 6
 
@@ -148,28 +149,25 @@ void CLuaWrapper::OnRender(double deltaTime)
 
 void CLuaWrapper::UpdateKeyboard()
 {
-	auto kb = m_pDirectXWrapper->GetKeyboardState();
+	static Robot::KeyState s;
+	Robot::Keyboard::GetState(s);
 
 	lua_newtable(m_pLuaState);
 
 	lua_pushliteral(m_pLuaState, "Shift");
-	lua_pushboolean(m_pLuaState, kb.LeftShift || kb.RightShift);
+	lua_pushboolean(m_pLuaState, s[Robot::Key::KeyShift]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "Control");
-	lua_pushboolean(m_pLuaState, kb.LeftControl || kb.RightControl);
+	lua_pushboolean(m_pLuaState, s[Robot::Key::KeyControl]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "Alt");
-	lua_pushboolean(m_pLuaState, kb.LeftAlt || kb.RightAlt);
+	lua_pushboolean(m_pLuaState, s[Robot::Key::KeyAlt]);
 	lua_settable(m_pLuaState, -3);
 
-	lua_pushliteral(m_pLuaState, "Windows");
-	lua_pushboolean(m_pLuaState, kb.LeftWindows || kb.RightWindows);
-	lua_settable(m_pLuaState, -3);
-
-	lua_pushliteral(m_pLuaState, "A");
-	lua_pushboolean(m_pLuaState, kb.A);
+	lua_pushliteral(m_pLuaState, "System");
+	lua_pushboolean(m_pLuaState, s[Robot::Key::KeySystem]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_setglobal(m_pLuaState, "Keyboard");
@@ -243,7 +241,7 @@ int CLuaWrapper::LuaLoadImage(lua_State *L)
 {
 	const char *filePath = luaL_checkstring(L, 1);
 
-	Image image = m_pDirectXWrapper->LoadImage(to_wstring(filePath).c_str());
+	DX::Image image = m_pDirectXWrapper->LoadImage(to_wstring(filePath).c_str());
 
 	lua_pushlightuserdata(L, image);
 
@@ -252,7 +250,7 @@ int CLuaWrapper::LuaLoadImage(lua_State *L)
 
 int CLuaWrapper::LuaReleaseImage(lua_State * L)
 {
-	Image image = (Image)lua_touserdata(L, 1);
+	DX::Image image = (DX::Image)lua_touserdata(L, 1);
 
 	m_pDirectXWrapper->ReleaseImage(image);
 
@@ -280,7 +278,7 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	lua_getfield(L, 1, "y");
 
 	// Get arguments
-	Image image = (Image)lua_touserdata(L, -3);
+	DX::Image image = (DX::Image)lua_touserdata(L, -3);
 	double xPosition = luaL_checknumber(L, -2);
 	double yPosition = luaL_checknumber(L, -1);
 	
@@ -300,7 +298,7 @@ int CLuaWrapper::LuaLoadFont(lua_State * L)
 {
 	const char *fontFamily = luaL_checkstring(L, 1);
 
-	Font font = m_pDirectXWrapper->LoadFont(to_wstring(fontFamily).c_str());
+	DX::Font font = m_pDirectXWrapper->LoadFont(to_wstring(fontFamily).c_str());
 
 	lua_pushlightuserdata(L, font);
 
@@ -309,7 +307,7 @@ int CLuaWrapper::LuaLoadFont(lua_State * L)
 
 int CLuaWrapper::LuaReleaseFont(lua_State * L)
 {
-	Font font = (Font)lua_touserdata(L, 1);
+	DX::Font font = (DX::Font)lua_touserdata(L, 1);
 
 	m_pDirectXWrapper->ReleaseFont(font);
 
@@ -341,7 +339,7 @@ int CLuaWrapper::LuaDrawText(lua_State * L)
 
 	// Get arguments
 	const char *text = luaL_checkstring(L, -6);
-	Font font = (Font)lua_touserdata(L, -5);
+	DX::Font font = (DX::Font)lua_touserdata(L, -5);
 	double size = luaL_checknumber(L, -4);
 	double x = luaL_checknumber(L, -3);
 	double y = luaL_checknumber(L, -2);

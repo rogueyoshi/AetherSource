@@ -261,6 +261,9 @@
     <ProjectReference Include="..\lua-5.3.2\lua-5.3.2.vcxproj">
       <Project>{69defc56-922a-4cb2-88cc-f0fb8dd6880c}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\robot\Source\Robot.vs15.vcxproj">
+      <Project>{18fa4b6a-bb03-4f80-92c2-d6237372fe11}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

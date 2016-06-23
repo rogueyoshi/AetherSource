@@ -29,9 +29,6 @@ namespace DX
 	}
 }
 
-HHOOK CDirectXWrapper::m_hHook = nullptr;
-std::thread * CDirectXWrapper::m_pHookThread = nullptr;
-
 CDirectXWrapper::CDirectXWrapper() :
 	m_iWidth(MINIMUM_WIDTH),
 	m_iHeight(MINIMUM_HEIGHT),
@@ -43,20 +40,12 @@ CDirectXWrapper::CDirectXWrapper() :
 
 	m_spriteBatch = std::make_unique<SpriteBatch>(m_d3dContext.Get());
 
-	m_keyboard = std::make_unique<Keyboard>();
-	m_gamePad = std::make_unique<GamePad>();
-
 	FW1CreateFactory(FW1_VERSION, m_fw1FontFactory.ReleaseAndGetAddressOf());
-
-	// Install hooks and create Windows messenging thread.
-	m_pHookThread = new std::thread(&CDirectXWrapper::Hook, this);
-	m_pHookThread->detach();
 }
 
 CDirectXWrapper::~CDirectXWrapper()
 {
-	UnhookWindowsHookEx(m_hHook);
-	delete m_pHookThread;
+	//
 }
 
 void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
@@ -73,9 +62,9 @@ void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
 	if (bChanged) CreateResources();
 }
 
-Image CDirectXWrapper::LoadImage(const wchar_t *filePath)
+DX::Image CDirectXWrapper::LoadImage(const wchar_t *filePath)
 {
-	Image texture;
+	DX::Image texture;
 	DX::ThrowIfFailed(
 		CreateWICTextureFromFile(m_d3dDevice.Get(), filePath, nullptr, &texture)
 	);
@@ -83,37 +72,37 @@ Image CDirectXWrapper::LoadImage(const wchar_t *filePath)
 	return texture;
 }
 
-void CDirectXWrapper::ReleaseImage(Image image)
+void CDirectXWrapper::ReleaseImage(DX::Image image)
 {
 	image->Release();
 	//delete image;
 }
 
-void CDirectXWrapper::DrawSprite(Image image, float xPosition, float yPosition)
+void CDirectXWrapper::DrawSprite(DX::Image image, float xPosition, float yPosition)
 {
 	m_spriteBatch->Draw(image, Vector2{ xPosition, yPosition });
 }
 
-Font CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
+DX::Font CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
 {
-	Font font;
+	DX::Font font;
 	m_fw1FontFactory->CreateFontWrapper(m_d3dDevice.Get(), fontFamily, &font);
 
 	return font;
 }
 
-void CDirectXWrapper::ReleaseFont(Font font)
+void CDirectXWrapper::ReleaseFont(DX::Font font)
 {
 	font->Release();
 	//delete font;
 }
 
-void CDirectXWrapper::DrawText(const WCHAR *text, Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
+void CDirectXWrapper::DrawText(const WCHAR *text, DX::Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
 {
 	font->DrawString(
 		m_d3dContext.Get(),
 		text, // String
-		size, // Font size
+		size, // DX::Font size
 		x, // X position
 		y, // Y position
 		color, // Text color, 0xAaBbGgRr
@@ -240,35 +229,4 @@ void CDirectXWrapper::CreateResources()
 
 	m_depthStencilViewDesc = CD3D11_DEPTH_STENCIL_VIEW_DESC(D3D11_DSV_DIMENSION_TEXTURE2D);
 	DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &m_depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
-}
-//TODO: fix this so that low level keyboard functions work.
-void CDirectXWrapper::Hook()
-{
-	m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](const int nCode, const WPARAM wParam, const LPARAM lParam) {
-		switch (wParam)
-		{
-		case WM_ACTIVATEAPP:
-			Keyboard::ProcessMessage(nCode, wParam, lParam);
-			break;
-		case WM_KEYDOWN:
-		case WM_SYSKEYDOWN:
-		case WM_KEYUP:
-		case WM_SYSKEYUP:
-			Keyboard::ProcessMessage(nCode, wParam, lParam);
-			break;
-		}
-
-		return CallNextHookEx(m_hHook, nCode, wParam, lParam);
-	}, NULL, 0);
-
-	if (m_hHook == NULL)
-	{
-		std::wcout << "Keyboard hook failed!" << std::endl;
-	}
-	else
-	{
-		std::wcout << "Keyboard hooked!" << std::endl;
-	}
-
-	while (GetMessage(NULL, NULL, 0, 0));
 }
