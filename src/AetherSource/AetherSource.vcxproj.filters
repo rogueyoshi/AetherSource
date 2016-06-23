@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
-    <None Include="LuaSource.def">
+    <None Include="AetherSource.def">
       <Filter>Module Definition Files</Filter>
     </None>
   </ItemGroup>

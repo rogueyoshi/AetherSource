@@ -100,14 +100,7 @@ HRESULT CPin::CheckMediaType(const CMediaType *pMediaType)
 
 	if (SubType == NULL) return E_INVALIDARG;
 
-	if (
-		(*SubType != MEDIASUBTYPE_ARGB32) &&
-		(*SubType != MEDIASUBTYPE_RGB32) &&
-		(*SubType != MEDIASUBTYPE_RGB24) &&
-		(*SubType != MEDIASUBTYPE_RGB565) &&
-		(*SubType != MEDIASUBTYPE_RGB555) &&
-		(*SubType != MEDIASUBTYPE_RGB8)
-	)
+	if (*SubType != MEDIASUBTYPE_RGB32)
 	{
 		return E_INVALIDARG;
 	}
@@ -155,7 +148,7 @@ HRESULT CPin::GetMediaType(int iPosition, CMediaType *pMt)
 	if (iPosition < 0) return E_INVALIDARG;
 
 	// Have we run off the end of types?
-	if (iPosition > 5) return VFW_S_NO_MORE_ITEMS;
+	if (iPosition > 0) return VFW_S_NO_MORE_ITEMS;
 
 	VIDEOINFO *pvi = (VIDEOINFO *)pMt->AllocFormatBuffer(sizeof(VIDEOINFO));
 	if (!pvi) return(E_OUTOFMEMORY);
@@ -168,18 +161,8 @@ HRESULT CPin::GetMediaType(int iPosition, CMediaType *pMt)
 	// Since we use RGB888 (the default for 32 bit), there is
 	// no reason to use BI_BITFIELDS to specify the RGB
 	// masks. Also, not everything supports BI_BITFIELDS
-	switch (iPosition)
-	{
-	case 0:
-	case 1:
-		pvi->bmiHeader.biCompression = BI_RGB;
-		pvi->bmiHeader.biBitCount = 32;
-		break;
-	case 2:
-		pvi->bmiHeader.biCompression = BI_RGB;
-		pvi->bmiHeader.biBitCount = 24;
-		break;
-	}
+	pvi->bmiHeader.biCompression = BI_RGB;
+	pvi->bmiHeader.biBitCount = 32;
 
 	// Adjust the parameters common to all formats
 	pvi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -235,7 +218,6 @@ HRESULT CPin::SetMediaType(const CMediaType *pMediaType)
 		else
 		{
 			hr = E_INVALIDARG;
-			ASSERT(FALSE);
 		}
 
 		if (pvi->AvgTimePerFrame) m_rtFrameLength = pvi->AvgTimePerFrame;

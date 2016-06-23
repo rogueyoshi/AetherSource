@@ -36,7 +36,7 @@ CFactoryTemplate g_Templates[] =
 	{
 		NAME(PROJECT_NAME), // Name
 		&CLSID_Filter, // CLSID
-		[](IUnknown *pUnk, HRESULT *pHr) -> CUnknown * { // Method to create an instance of LuaSource
+		[](IUnknown *pUnk, HRESULT *pHr) -> CUnknown * { // Method to create an instance of AetherSource
 		CFilter *pFilter = new CFilter(pUnk, pHr);
 
 		if (pHr)

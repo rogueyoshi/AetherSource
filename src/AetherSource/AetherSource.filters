@@ -37,7 +37,7 @@
     <ClCompile Include="OpenFileDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LuaSource.cpp">
+    <ClCompile Include="AetherSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -67,7 +67,7 @@
     <ClInclude Include="Guids.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LuaSource.h">
+    <ClInclude Include="AetherSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -20,10 +20,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{39469123-3EB7-45F3-A15B-3854DFD2C2EB}</ProjectGuid>
-    <RootNamespace>LuaSource</RootNamespace>
+    <RootNamespace>AetherSource</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>LuaSource</ProjectName>
+    <ProjectName>AetherSource</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -120,7 +120,7 @@
       <ImportLibrary />
       <AdditionalDependencies>notelemetry.obj;winmm.lib;d3d11.lib;dxguid.lib;uuid.lib;%(AdditionalDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\AetherSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
     <ResourceCompile />
@@ -153,7 +153,7 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>No</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\AetherSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
     <ResourceCompile />
@@ -183,7 +183,7 @@
       <AdditionalDependencies>notelemetry.obj;winmm.lib;%(AdditionalDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\AetherSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
     <ResourceCompile />
@@ -218,7 +218,7 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>No</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\LuaSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\rogueyoshi\Documents\Visual Studio 2015\Projects\AetherSource\src\luajit-2.0\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference />
     <ResourceCompile />
@@ -235,7 +235,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
-    <None Include="LuaSource.def" />
+    <None Include="AetherSource.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXWrapper.h" />
