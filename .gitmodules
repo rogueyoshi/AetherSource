@@ -1,3 +1,6 @@
 [submodule "src/DirectXTK"]
 	path = src/DirectXTK
-	url = https://github.com/AetherMachine/DirectXTK.git
+	url = https://github.com/Microsoft/DirectXTK.git
+[submodule "src/robot"]
+	path = src/robot
+	url = https://github.com/Robot/robot.git
