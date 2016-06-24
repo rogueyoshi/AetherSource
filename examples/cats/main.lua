@@ -1,7 +1,7 @@
 require("EventListener")
 
 --
--- Setup Filter
+-- Setup
 --
 
 --
@@ -27,7 +27,7 @@ local font = LoadFont("Arial")
 
 local text = ""
 
-local eventShiftPressed = registerEvent
+local eventShiftPressed = RegisterEvent
 {
 	conditions = {
 		function () return Keyboard.Shift == true end
@@ -35,7 +35,7 @@ local eventShiftPressed = registerEvent
 	callback = function () text = "Shift" end
 }
 
-local eventShiftReleased = registerEvent
+local eventShiftReleased = RegisterEvent
 {
 	conditions = {
 		function () return Keyboard.Shift == false end
@@ -48,18 +48,18 @@ local eventShiftReleased = registerEvent
 local elapsedTime = 0
 
 --
--- Source Filter Callbacks
+-- Callbacks
 --
 
 function OnDestroy()
-	unregisterEvent(eventShiftReleased)
-	unregisterEvent(eventShiftPressed)
+	UnregisterEvent(eventShiftReleased)
+	UnregisterEvent(eventShiftPressed)
 	ReleaseFont(font)
 	ReleaseImage(catImage)
 end
 
 function OnUpdate(deltaTime)
-	processEvents()
+	ProcessEvents()
 
 	for _, cat in pairs(cats) do
 		--

@@ -1,17 +1,17 @@
 local events = {}
 local eventCount = 0
 
-function registerEvent (event)
+function RegisterEvent (event)
 	table.insert(events, event)
 	return eventCount + 1
 end
 
-function unregisterEvent (event)
+function UnregisterEvent (event)
 	table.remove(events, event)
 	eventCount = eventCount - 1
 end
 
-function processEvents ()
+function ProcessEvents ()
 	for _, event in pairs(events) do
 		for _, condition in pairs(event.conditions) do
 			if condition() then
