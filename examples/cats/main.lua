@@ -8,13 +8,13 @@ require("EventListener")
 SetResolution(GetDisplayWidth(), GetDisplayHeight(), 30);
 
 --
-local catImage = LoadImage('cat.png')
+local catTexture = LoadTexture('cat.png')
 
 local cats = {}
 
 for i = 1, 32 do
 	local cat = {
-		image = catImage,
+		texture = catTexture,
 		xPosition = math.random(GetWidth()),
 		yPosition = math.random(GetHeight())
 	}
@@ -53,7 +53,7 @@ function OnDestroy()
 	UnregisterEvent(onceShiftReleased)
 	UnregisterEvent(onceShiftPressed)
 	ReleaseFont(font)
-	ReleaseImage(catImage)
+	ReleaseTexture(catTexture)
 end
 
 function OnUpdate(deltaTime)
@@ -70,7 +70,7 @@ function OnRender(deltaTime)
 	for _, cat in pairs(cats) do
 		DrawSprite
 		{
-			image = cat.image,
+			texture = cat.texture,
 			xPosition = cat.xPosition + math.sin(elapsedTime * 8) * 16,
 			yPosition = cat.yPosition + math.sin(elapsedTime * 4) * 16
 		}

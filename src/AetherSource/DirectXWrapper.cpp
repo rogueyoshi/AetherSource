@@ -50,7 +50,7 @@ void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
 	if (bChanged) CreateResources();
 }
 
-ID3D11ShaderResourceView *CDirectXWrapper::LoadImage(const wchar_t *filePath)
+ID3D11ShaderResourceView *CDirectXWrapper::LoadTexture(const wchar_t *filePath)
 {
 	ID3D11ShaderResourceView *texture;
 	DX::ThrowIfFailed(
@@ -60,15 +60,15 @@ ID3D11ShaderResourceView *CDirectXWrapper::LoadImage(const wchar_t *filePath)
 	return texture;
 }
 
-void CDirectXWrapper::ReleaseImage(ID3D11ShaderResourceView *image)
+void CDirectXWrapper::ReleaseTexture(ID3D11ShaderResourceView *texture)
 {
-	image->Release();
-	//delete image;
+	texture->Release();
+	//delete texture;
 }
 
-void CDirectXWrapper::DrawSprite(ID3D11ShaderResourceView *image, float xPosition, float yPosition, float redBlend, float greenBlend, float blueBlend, float alphaBlend)
+void CDirectXWrapper::DrawSprite(ID3D11ShaderResourceView *texture, float xPosition, float yPosition, float redBlend, float greenBlend, float blueBlend, float alphaBlend)
 {
-	m_spriteBatch->Draw(image, XMFLOAT2{ xPosition, yPosition }, FXMVECTOR{ redBlend, greenBlend, blueBlend, alphaBlend });
+	m_spriteBatch->Draw(texture, XMFLOAT2{ xPosition, yPosition }, FXMVECTOR{ redBlend, greenBlend, blueBlend, alphaBlend });
 }
 
 IFW1FontWrapper *CDirectXWrapper::LoadFont(LPCWSTR fontFamily)

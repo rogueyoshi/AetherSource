@@ -37,9 +37,9 @@ public:
 	int GetHeight() { return m_iHeight; }
 	void SetResolution(int iWidth, int iHeight);
 
-	ID3D11ShaderResourceView *LoadImage(const wchar_t *filePath);
-	void ReleaseImage(ID3D11ShaderResourceView *image);
-	void DrawSprite(ID3D11ShaderResourceView *image, float xPosition, float yPosition, float redBlend, float greenBlend, float blueBlend, float alphaBlend);
+	ID3D11ShaderResourceView *LoadTexture(const wchar_t *filePath);
+	void ReleaseTexture(ID3D11ShaderResourceView *texture);
+	void DrawSprite(ID3D11ShaderResourceView *texture, float xPosition, float yPosition, float redBlend, float greenBlend, float blueBlend, float alphaBlend);
 
 	IFW1FontWrapper *LoadFont(LPCWSTR fontFamily);
 	void ReleaseFont(IFW1FontWrapper *font);

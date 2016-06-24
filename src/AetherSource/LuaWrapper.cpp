@@ -77,8 +77,8 @@ bool CLuaWrapper::Open(const char *fn)
 	lua_register(m_pLuaState, "GetWidth", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetWidth>);
 	lua_register(m_pLuaState, "GetHeight", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetHeight>);
 	lua_register(m_pLuaState, "GetFPS", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetFPS>);
-	lua_register(m_pLuaState, "LoadImage", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadImage>);
-	lua_register(m_pLuaState, "ReleaseImage", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseImage>);
+	lua_register(m_pLuaState, "LoadTexture", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadTexture>);
+	lua_register(m_pLuaState, "ReleaseTexture", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseTexture>);
 	lua_register(m_pLuaState, "DrawSprite", &NLuaWrapper::dispatch<&CLuaWrapper::LuaDrawSprite>);
 	lua_register(m_pLuaState, "LoadFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadFont>);
 	lua_register(m_pLuaState, "ReleaseFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseFont>);
@@ -237,22 +237,22 @@ int CLuaWrapper::LuaGetDisplayFrequency(lua_State *L)
 	return 1;
 }
 
-int CLuaWrapper::LuaLoadImage(lua_State *L)
+int CLuaWrapper::LuaLoadTexture(lua_State *L)
 {
 	auto filePath = luaL_checkstring(L, 1);
 
-	auto image = m_pDirectXWrapper->LoadImage(to_wstring(filePath).c_str());
+	auto texture = m_pDirectXWrapper->LoadTexture(to_wstring(filePath).c_str());
 
-	lua_pushlightuserdata(L, image);
+	lua_pushlightuserdata(L, texture);
 
 	return 1;
 }
 
-int CLuaWrapper::LuaReleaseImage(lua_State * L)
+int CLuaWrapper::LuaReleaseTexture(lua_State * L)
 {
-	auto image = (ID3D11ShaderResourceView *)lua_touserdata(L, 1);
+	auto texture = (ID3D11ShaderResourceView *)lua_touserdata(L, 1);
 
-	m_pDirectXWrapper->ReleaseImage(image);
+	m_pDirectXWrapper->ReleaseTexture(texture);
 
 	return 0;
 }
@@ -273,7 +273,7 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	// 'unpack' the table by putting the values onto
 	// the stack first. Then convert those stack values
 	// into an appropriate C type.
-	lua_getfield(L, 1, "image");
+	lua_getfield(L, 1, "texture");
 	lua_getfield(L, 1, "xPosition");
 	lua_getfield(L, 1, "yPosition");
 	lua_getfield(L, 1, "redBlend");
@@ -282,7 +282,7 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	lua_getfield(L, 1, "alphaBlend");
 
 	// Get arguments
-	auto image = (ID3D11ShaderResourceView *)lua_touserdata(L, -7);
+	auto texture = (ID3D11ShaderResourceView *)lua_touserdata(L, -7);
 	auto xPosition = luaL_checknumber(L, -6);
 	auto yPosition = luaL_checknumber(L, -5);
 	auto redBlend = luaL_optnumber(L, -4, 1.0);
@@ -291,7 +291,7 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	auto alphaBlend = luaL_optnumber(L, -1, 1.0);
 
 	// Draw sprite
-    m_pDirectXWrapper->DrawSprite(image, xPosition, yPosition, redBlend, greenBlend, blueBlend, alphaBlend);
+    m_pDirectXWrapper->DrawSprite(texture, xPosition, yPosition, redBlend, greenBlend, blueBlend, alphaBlend);
 
 	//
 	lua_pop(L, 3);
