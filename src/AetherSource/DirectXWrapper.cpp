@@ -17,6 +17,17 @@
 
 using namespace DirectX::SimpleMath;
 
+namespace DX
+{
+	inline void ThrowIfFailed(HRESULT hr)
+	{
+		if (FAILED(hr))
+		{
+			// Set a breakpoint on this line to catch DirectX API errors
+			throw std::exception();
+		}
+	}
+}
 CDirectXWrapper::CDirectXWrapper() :
 	m_iWidth(MINIMUM_WIDTH),
 	m_iHeight(MINIMUM_HEIGHT),

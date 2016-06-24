@@ -68,12 +68,20 @@ end
 
 function OnRender(deltaTime)	
 	for i, cat in pairs(cats) do
-		DrawSprite
+		DrawSprite -- Normal image
+		{
+			texture = cat.texture,
+			xPosition = cat.xPosition,
+			yPosition = cat.yPosition
+		}
+		DrawSprite -- After image
 		{
 			texture = cat.texture,
 			xPosition = cat.xPosition + math.sin(i / #cats * elapsedTime * 8) * 16,
-			yPosition = cat.yPosition + math.sin(i / #cats * elapsedTime * 4) * 16
+			yPosition = cat.yPosition + math.sin(i / #cats * elapsedTime * 4) * 16,
+			alphaBlend = 0.5
 		}
+
 	end
 	
 	DrawText
