@@ -27,17 +27,17 @@ local font = LoadFont("Arial")
 
 local text = ""
 
-local eventShiftPressed = RegisterEvent
+local onceShiftPressed = RegisterEvent
 {
 	condition = function () return Keyboard.Shift == true end,
-	callback = function () text = "Keyboard.Shift == true" end,
+	callback = function () print "Keyboard.Shift == true" end,
 	once = true
 }
 
-local eventShiftReleased = RegisterEvent
+local onceShiftReleased = RegisterEvent
 {
 	condition = function () return Keyboard.Shift == false end,
-	callback = function () text = "Keyboard.Shift == false" end,
+	callback = function () print "Keyboard.Shift == false" end,
 	once = true,
 	before = true
 }
@@ -50,8 +50,8 @@ local elapsedTime = 0
 --
 
 function OnDestroy()
-	UnregisterEvent(eventShiftReleased)
-	UnregisterEvent(eventShiftPressed)
+	UnregisterEvent(onceShiftReleased)
+	UnregisterEvent(onceShiftPressed)
 	ReleaseFont(font)
 	ReleaseImage(catImage)
 end
