@@ -4,6 +4,7 @@
 //#include <functional>
 #include "LuaWrapper.h"
 #include "StringHelper.h"
+#include "../robot/Source/Robot.h"
 
 #define MINIMUM_FPS 6
 
@@ -18,7 +19,7 @@ namespace NLuaWrapper
 
 	int dispatch(lua_State *L)
 	{
-		CLuaWrapper *pointer = *static_cast<CLuaWrapper**>(lua_getextraspace(L));
+		auto pointer = *static_cast<CLuaWrapper**>(lua_getextraspace(L));
 
 		return ((*pointer).*function)(L);
 	}
@@ -76,8 +77,8 @@ bool CLuaWrapper::Open(const char *fn)
 	lua_register(m_pLuaState, "GetWidth", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetWidth>);
 	lua_register(m_pLuaState, "GetHeight", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetHeight>);
 	lua_register(m_pLuaState, "GetFPS", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetFPS>);
-	lua_register(m_pLuaState, "LoadImage", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadImage>);
-	lua_register(m_pLuaState, "ReleaseImage", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseImage>);
+	lua_register(m_pLuaState, "LoadTexture", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadTexture>);
+	lua_register(m_pLuaState, "ReleaseTexture", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseTexture>);
 	lua_register(m_pLuaState, "DrawSprite", &NLuaWrapper::dispatch<&CLuaWrapper::LuaDrawSprite>);
 	lua_register(m_pLuaState, "LoadFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadFont>);
 	lua_register(m_pLuaState, "ReleaseFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseFont>);
@@ -148,28 +149,25 @@ void CLuaWrapper::OnRender(double deltaTime)
 
 void CLuaWrapper::UpdateKeyboard()
 {
-	auto kb = m_pDirectXWrapper->GetKeyboardState();
+	static Robot::KeyState s;
+	Robot::Keyboard::GetState(s);
 
 	lua_newtable(m_pLuaState);
 
 	lua_pushliteral(m_pLuaState, "Shift");
-	lua_pushboolean(m_pLuaState, kb.LeftShift || kb.RightShift);
+	lua_pushboolean(m_pLuaState, s[Robot::Key::KeyShift]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "Control");
-	lua_pushboolean(m_pLuaState, kb.LeftControl || kb.RightControl);
+	lua_pushboolean(m_pLuaState, s[Robot::Key::KeyControl]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "Alt");
-	lua_pushboolean(m_pLuaState, kb.LeftAlt || kb.RightAlt);
+	lua_pushboolean(m_pLuaState, s[Robot::Key::KeyAlt]);
 	lua_settable(m_pLuaState, -3);
 
-	lua_pushliteral(m_pLuaState, "Windows");
-	lua_pushboolean(m_pLuaState, kb.LeftWindows || kb.RightWindows);
-	lua_settable(m_pLuaState, -3);
-
-	lua_pushliteral(m_pLuaState, "A");
-	lua_pushboolean(m_pLuaState, kb.A);
+	lua_pushliteral(m_pLuaState, "System");
+	lua_pushboolean(m_pLuaState, s[Robot::Key::KeySystem]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_setglobal(m_pLuaState, "Keyboard");
@@ -200,16 +198,16 @@ int CLuaWrapper::LuaGetFPS(lua_State *L)
 
 int CLuaWrapper::LuaSetResolution(lua_State *L)
 {
-	SetResolution((int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2));
-	SetFPS((int)luaL_checkinteger(L, 3));
+	SetResolution(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
+	SetFPS(luaL_checkinteger(L, 3));
 
 	return 0;
 }
 
 int CLuaWrapper::LuaGetDisplayWidth(lua_State *L)
 {
-	HDC hDC = GetDC(NULL);
-	int width = GetDeviceCaps(hDC, HORZRES);
+	auto hDC = GetDC(NULL);
+	auto width = GetDeviceCaps(hDC, HORZRES);
 	ReleaseDC(NULL, hDC);
 
 	lua_pushinteger(L, width);
@@ -219,8 +217,8 @@ int CLuaWrapper::LuaGetDisplayWidth(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayHeight(lua_State *L)
 {
-	HDC hDC = GetDC(NULL);
-	int height = GetDeviceCaps(hDC, VERTRES);
+	auto hDC = GetDC(NULL);
+	auto height = GetDeviceCaps(hDC, VERTRES);
 	ReleaseDC(NULL, hDC);
 
 	lua_pushinteger(L, height);
@@ -230,8 +228,8 @@ int CLuaWrapper::LuaGetDisplayHeight(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayFrequency(lua_State *L)
 {
-	HDC hDC = GetDC(NULL);
-	int frequency = GetDeviceCaps(hDC, VREFRESH);
+	auto hDC = GetDC(NULL);
+	auto frequency = GetDeviceCaps(hDC, VREFRESH);
 	ReleaseDC(NULL, hDC);
 
 	lua_pushinteger(L, frequency);
@@ -239,22 +237,22 @@ int CLuaWrapper::LuaGetDisplayFrequency(lua_State *L)
 	return 1;
 }
 
-int CLuaWrapper::LuaLoadImage(lua_State *L)
+int CLuaWrapper::LuaLoadTexture(lua_State *L)
 {
-	const char *filePath = luaL_checkstring(L, 1);
+	auto filePath = luaL_checkstring(L, 1);
 
-	Image image = m_pDirectXWrapper->LoadImage(to_wstring(filePath).c_str());
+	auto texture = m_pDirectXWrapper->LoadTexture(to_wstring(filePath).c_str());
 
-	lua_pushlightuserdata(L, image);
+	lua_pushlightuserdata(L, texture);
 
 	return 1;
 }
 
-int CLuaWrapper::LuaReleaseImage(lua_State * L)
+int CLuaWrapper::LuaReleaseTexture(lua_State * L)
 {
-	Image image = (Image)lua_touserdata(L, 1);
+	auto texture = (ID3D11ShaderResourceView *)lua_touserdata(L, 1);
 
-	m_pDirectXWrapper->ReleaseImage(image);
+	m_pDirectXWrapper->ReleaseTexture(texture);
 
 	return 0;
 }
@@ -275,17 +273,25 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	// 'unpack' the table by putting the values onto
 	// the stack first. Then convert those stack values
 	// into an appropriate C type.
-	lua_getfield(L, 1, "image");
-	lua_getfield(L, 1, "x");
-	lua_getfield(L, 1, "y");
+	lua_getfield(L, 1, "texture");
+	lua_getfield(L, 1, "xPosition");
+	lua_getfield(L, 1, "yPosition");
+	lua_getfield(L, 1, "redBlend");
+	lua_getfield(L, 1, "greenBlend");
+	lua_getfield(L, 1, "blueBlend");
+	lua_getfield(L, 1, "alphaBlend");
 
 	// Get arguments
-	Image image = (Image)lua_touserdata(L, -3);
-	double xPosition = luaL_checknumber(L, -2);
-	double yPosition = luaL_checknumber(L, -1);
-	
+	auto texture = (ID3D11ShaderResourceView *)lua_touserdata(L, -7);
+	auto xPosition = luaL_checknumber(L, -6);
+	auto yPosition = luaL_checknumber(L, -5);
+	auto redBlend = luaL_optnumber(L, -4, 1.0);
+	auto greenBlend = luaL_optnumber(L, -3, 1.0);
+	auto blueBlend = luaL_optnumber(L, -2, 1.0);
+	auto alphaBlend = luaL_optnumber(L, -1, 1.0);
+
 	// Draw sprite
-    m_pDirectXWrapper->DrawSprite(image, float(xPosition), float(yPosition));
+    m_pDirectXWrapper->DrawSprite(texture, xPosition, yPosition, redBlend, greenBlend, blueBlend, alphaBlend);
 
 	//
 	lua_pop(L, 3);
@@ -298,9 +304,9 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 
 int CLuaWrapper::LuaLoadFont(lua_State * L)
 {
-	const char *fontFamily = luaL_checkstring(L, 1);
+	auto fontFamily = luaL_checkstring(L, 1);
 
-	Font font = m_pDirectXWrapper->LoadFont(to_wstring(fontFamily).c_str());
+	auto font = m_pDirectXWrapper->LoadFont(to_wstring(fontFamily).c_str());
 
 	lua_pushlightuserdata(L, font);
 
@@ -309,7 +315,7 @@ int CLuaWrapper::LuaLoadFont(lua_State * L)
 
 int CLuaWrapper::LuaReleaseFont(lua_State * L)
 {
-	Font font = (Font)lua_touserdata(L, 1);
+	auto font = (IFW1FontWrapper *)lua_touserdata(L, 1);
 
 	m_pDirectXWrapper->ReleaseFont(font);
 
@@ -340,14 +346,14 @@ int CLuaWrapper::LuaDrawText(lua_State * L)
 	lua_getfield(L, 1, "color");
 
 	// Get arguments
-	const char *text = luaL_checkstring(L, -6);
-	Font font = (Font)lua_touserdata(L, -5);
-	double size = luaL_checknumber(L, -4);
-	double x = luaL_checknumber(L, -3);
-	double y = luaL_checknumber(L, -2);
-	long long color = luaL_optinteger(L, -1, 0xFFFFFFFF);
+	auto text = luaL_checkstring(L, -6);
+	auto font = (IFW1FontWrapper *)lua_touserdata(L, -5);
+	auto size = luaL_checknumber(L, -4);
+	auto x = luaL_checknumber(L, -3);
+	auto y = luaL_checknumber(L, -2);
+	auto color = luaL_optinteger(L, -1, 0xFFFFFFFF);
 
-	m_pDirectXWrapper->DrawText(to_wstring(text).c_str(), font, float(size), float(x), float(y), UINT32(color));
+	m_pDirectXWrapper->DrawText(to_wstring(text).c_str(), font, size, x, y, color);
 
 	lua_pop(L, 6);
 

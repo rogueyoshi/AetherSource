@@ -37,8 +37,8 @@ protected:
 	int LuaGetDisplayWidth(lua_State *L);
 	int LuaGetDisplayHeight(lua_State *L);
 	int LuaGetDisplayFrequency(lua_State *L);
-	int LuaLoadImage(lua_State *L);
-	int LuaReleaseImage(lua_State *L);
+	int LuaLoadTexture(lua_State *L);
+	int LuaReleaseTexture(lua_State *L);
 	int LuaDrawSprite(lua_State *L);
 	int LuaLoadFont(lua_State *L);
 	int LuaReleaseFont(lua_State *L);

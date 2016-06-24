@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "guicon.h"
+#include "GuiCon.h"
 
 // maximum mumber of lines the output console should have
 //static const WORD MAX_CONSOLE_LINES = 500;

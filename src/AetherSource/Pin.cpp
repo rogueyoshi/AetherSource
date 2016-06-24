@@ -24,7 +24,7 @@ CPin::CPin(HRESULT *pHr, CSource *pFilter) : CSourceStream(NAME("Pin"), pHr, pFi
 
 	m_pLuaWrapper = new CLuaWrapper();
 
-	static OpenFileDialog *pFileDialog = new OpenFileDialog();
+	static auto *pFileDialog = new OpenFileDialog();
 	pFileDialog->Title = TEXT("Open Lua script");
 	//pFileDialog->DefaultExtension = TEXT(".lua");
 	pFileDialog->Filter = TEXT(".lua");
@@ -96,7 +96,7 @@ HRESULT CPin::CheckMediaType(const CMediaType *pMediaType)
 	}
 
 	// Check for the subtypes we support
-	const GUID *SubType = pMediaType->Subtype();
+	auto SubType = pMediaType->Subtype();
 
 	if (SubType == NULL) return E_INVALIDARG;
 
@@ -106,7 +106,7 @@ HRESULT CPin::CheckMediaType(const CMediaType *pMediaType)
 	}
 
 	// Get the format area of the media type
-	VIDEOINFO *pvi = (VIDEOINFO *)pMediaType->Format();
+	auto pvi = (VIDEOINFO *)pMediaType->Format();
 	if (pvi == NULL) return E_INVALIDARG;
 
 	// Don't accept formats with negative height, which would cause the 
@@ -150,7 +150,7 @@ HRESULT CPin::GetMediaType(int iPosition, CMediaType *pMt)
 	// Have we run off the end of types?
 	if (iPosition > 0) return VFW_S_NO_MORE_ITEMS;
 
-	VIDEOINFO *pvi = (VIDEOINFO *)pMt->AllocFormatBuffer(sizeof(VIDEOINFO));
+	auto pvi = (VIDEOINFO *)pMt->AllocFormatBuffer(sizeof(VIDEOINFO));
 	if (!pvi) return(E_OUTOFMEMORY);
 
 	// Initialize the VideoInfo structure before configuring its members
@@ -186,7 +186,7 @@ HRESULT CPin::GetMediaType(int iPosition, CMediaType *pMt)
 	// TODO: Figure out how to get it to accept the MEDIASUBTYPE_ARGB32 subtype
 	if (*pMt->Subtype() == GUID_NULL)
 	{
-		const GUID SubTypeGUID = GetBitmapSubtype(&pvi->bmiHeader);
+		auto SubTypeGUID = GetBitmapSubtype(&pvi->bmiHeader);
 		pMt->SetSubtype(&SubTypeGUID);
 	}
 
@@ -204,11 +204,11 @@ HRESULT CPin::SetMediaType(const CMediaType *pMediaType)
 	CAutoLock autoLock(m_pFilter->pStateLock());
 
 	// Pass the call up to my base class
-	HRESULT hr = CSourceStream::SetMediaType(pMediaType);
+	auto hr = CSourceStream::SetMediaType(pMediaType);
 
 	if (SUCCEEDED(hr))
 	{
-		VIDEOINFO * pvi = (VIDEOINFO *)m_mt.Format();
+		auto pvi = (VIDEOINFO *)m_mt.Format();
 		if (pvi == NULL) return E_UNEXPECTED;
 
 		if (pvi->bmiHeader.biBitCount == 32)
@@ -240,7 +240,7 @@ HRESULT CPin::DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIES *pPro
 	CheckPointer(pAlloc, E_POINTER);
 	CheckPointer(pProperties, E_POINTER);
 
-	VIDEOINFO *pvi = (VIDEOINFO *)m_mt.Format();
+	auto pvi = (VIDEOINFO *)m_mt.Format();
 	pProperties->cBuffers = 1;
 	pProperties->cbBuffer = pvi->bmiHeader.biSizeImage;
 	ASSERT(pProperties->cbBuffer);
@@ -249,7 +249,7 @@ HRESULT CPin::DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIES *pPro
 	// can succeed (return NOERROR) but still not have allocated the
 	// memory that we requested, so we must check we got whatever we wanted.
 	ALLOCATOR_PROPERTIES Actual;
-	HRESULT hr = pAlloc->SetProperties(pProperties, &Actual);
+	auto hr = pAlloc->SetProperties(pProperties, &Actual);
 
 	if (FAILED(hr))	return hr;
 
@@ -295,22 +295,22 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 	// Check that we're still using video
 	ASSERT(m_mt.formattype == FORMAT_VideoInfo);
 
-	VIDEOINFOHEADER *pVih = (VIDEOINFOHEADER *)m_mt.pbFormat;
+	auto pVih = (VIDEOINFOHEADER *)m_mt.pbFormat;
 
 	// Update and Render from Lua
-	DWORD currentTime = GetCurrentTime();
-	static DWORD previousTime = currentTime;
-	double deltaTime = (currentTime - previousTime) * 0.001;
+	auto currentTime = GetCurrentTime();
+	static auto previousTime = currentTime;
+	auto deltaTime = (currentTime - previousTime) * 0.001;
 	m_pLuaWrapper->OnUpdate(deltaTime);
 	m_pLuaWrapper->OnRender(deltaTime);
 
 	// Capture output from Lua's DirectX instance
-	HBITMAP hBitmap = m_pLuaWrapper->Capture();
+	auto hBitmap = m_pLuaWrapper->Capture();
 
 	// Copy the DIB bits over into our filter's output buffer.
 	// Since sample size may be larger than the image size, bound the copy size.
 	//int nSize = min(pVih->bmiHeader.biSizeImage, (DWORD)cbData);
-	HDC hDC = GetDC(NULL);
+	auto hDC = GetDC(NULL);
 	GetDIBits(hDC, hBitmap, 0, m_pLuaWrapper->GetHeight(), pData, (BITMAPINFO *)&(pVih->bmiHeader), DIB_RGB_COLORS);
 	ReleaseDC(NULL, hDC);
 
@@ -321,8 +321,8 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 	// then you'll also need to configure the AVI Mux filter to 
 	// set the Average Time Per Frame for the AVI Header.
 	// The current time is the sample's start.
-	REFERENCE_TIME rtStart = m_iFrameNumber * m_rtFrameLength;
-	REFERENCE_TIME rtStop = rtStart + m_rtFrameLength;
+	auto rtStart = m_iFrameNumber * m_rtFrameLength;
+	auto rtStop = rtStart + m_rtFrameLength;
 	pSample->SetTime(&rtStart, &rtStop);
 
 	// Increment frame number
@@ -387,7 +387,7 @@ HRESULT STDMETHODCALLTYPE CPin::SetFormat(AM_MEDIA_TYPE *pMt)
 
 		if (CheckMediaType((CMediaType *)pMt) != S_OK) return E_FAIL; // just in case :P [FME...]
 
-		VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER *)pMt->pbFormat;
+		auto pvi = (VIDEOINFOHEADER *)pMt->pbFormat;
 
 		// for FMLE's benefit, only accept a setFormat of our "final" width [force setting via registry I guess, otherwise it only shows 80x60 whoa!]	    
 		// flash media live encoder uses setFormat to determine widths [?] and then only displays the smallest? huh?
@@ -405,7 +405,7 @@ HRESULT STDMETHODCALLTYPE CPin::SetFormat(AM_MEDIA_TYPE *pMt)
 
 	if (pPin)
 	{
-		HRESULT hr = m_pFilter->GetFilterGraph()->Reconnect(this);
+		auto hr = m_pFilter->GetFilterGraph()->Reconnect(this);
 		if (hr != S_OK) return hr; // LODO check first, and then just re-use the old one?
 								   // else return early...not really sure how to handle this...since we already set m_mt...but it's a pretty rare case I think...
 								   // plus ours is a weird case...
@@ -442,13 +442,13 @@ HRESULT STDMETHODCALLTYPE CPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE **pMt, B
 {
 	CAutoLock autoLock(m_pFilter->pStateLock());
 
-	HRESULT hr = GetMediaType(iIndex, &m_mt); // ensure setup/re-use m_mt... some are indeed shared, apparently.
+	auto hr = GetMediaType(iIndex, &m_mt); // ensure setup/re-use m_mt... some are indeed shared, apparently.
 	if (FAILED(hr))	return hr;
 
 	*pMt = CreateMediaType(&m_mt); // a windows lib method, also does a copy for us
 	if (*pMt == NULL) return E_OUTOFMEMORY;
 
-	VIDEO_STREAM_CONFIG_CAPS *pVSCC = (VIDEO_STREAM_CONFIG_CAPS*)(pSCC);
+	auto pVSCC = (VIDEO_STREAM_CONFIG_CAPS *)(pSCC);
 
 	/*
 	most of these are listed as deprecated by msdn... yet some still used, apparently. odd.

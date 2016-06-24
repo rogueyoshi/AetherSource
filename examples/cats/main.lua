@@ -1,12 +1,20 @@
+require("EventListener")
+
+--
+-- Setup
+--
+
+--
 SetResolution(GetDisplayWidth(), GetDisplayHeight(), 30);
 
-local catImage = LoadImage('cat.png')
+--
+local catTexture = LoadTexture('cat.png')
 
 local cats = {}
 
 for i = 1, 32 do
 	local cat = {
-		image = catImage,
+		texture = catTexture,
 		xPosition = math.random(GetWidth()),
 		yPosition = math.random(GetHeight())
 	}
@@ -14,42 +22,75 @@ for i = 1, 32 do
 	table.insert(cats, cat)
 end
 
+--
 local font = LoadFont("Arial")
 
-local time = 0
+local text = ""
+
+local onceShiftReleased = RegisterEvent
+{
+	condition = function () return Keyboard.Shift == false end,
+	callback = function () text = "Keyboard.Shift == false" end,
+	once = true,
+	before = true
+}
+
+local onceShiftPressed = RegisterEvent
+{
+	condition = function () return Keyboard.Shift == true end,
+	callback = function () text = "Keyboard.Shift == true" end,
+	once = true
+}
+
+--
+local elapsedTime = 0
+
+--
+-- Callbacks
+--
 
 function OnDestroy()
-	ReleaseImage(catImage)
+	UnregisterEvent(onceShiftPressed)
+	UnregisterEvent(onceShiftReleased)
 	ReleaseFont(font)
+	ReleaseTexture(catTexture)
 end
 
 function OnUpdate(deltaTime)
-	print(Keyboard.A)
+	ProcessEvents()
 
 	for _, cat in pairs(cats) do
 		--
 	end
 	
-	time = time + deltaTime
+	elapsedTime = elapsedTime + deltaTime
 end
 
 function OnRender(deltaTime)	
-	for _, cat in pairs(cats) do
-		DrawSprite
+	for i, cat in pairs(cats) do
+		DrawSprite -- Normal image
 		{
-			image = cat.image,
-			x = cat.xPosition + math.sin(time * 8) * 16,
-			y = cat.yPosition + math.sin(time * 4) * 16
+			texture = cat.texture,
+			xPosition = cat.xPosition,
+			yPosition = cat.yPosition
 		}
+		DrawSprite -- After image
+		{
+			texture = cat.texture,
+			xPosition = cat.xPosition + math.sin(i / #cats * elapsedTime * 8) * 16,
+			yPosition = cat.yPosition + math.sin(i / #cats * elapsedTime * 4) * 16,
+			alphaBlend = 0.5
+		}
+
 	end
 	
 	DrawText
 	{
-		text = 'Hello, world!',
+		text = text,
 		font = font,
 		size = 128,
-		x = 100,
-		y = 50,
+		x = 0,
+		y = 0,
 		color = 0xFF0099FF
 	}
 end

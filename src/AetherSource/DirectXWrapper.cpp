@@ -28,10 +28,6 @@ namespace DX
 		}
 	}
 }
-
-HHOOK CDirectXWrapper::m_hHook = nullptr;
-std::thread * CDirectXWrapper::m_pHookThread = nullptr;
-
 CDirectXWrapper::CDirectXWrapper() :
 	m_iWidth(MINIMUM_WIDTH),
 	m_iHeight(MINIMUM_HEIGHT),
@@ -43,20 +39,12 @@ CDirectXWrapper::CDirectXWrapper() :
 
 	m_spriteBatch = std::make_unique<SpriteBatch>(m_d3dContext.Get());
 
-	m_keyboard = std::make_unique<Keyboard>();
-	m_gamePad = std::make_unique<GamePad>();
-
 	FW1CreateFactory(FW1_VERSION, m_fw1FontFactory.ReleaseAndGetAddressOf());
-
-	// Install hooks and create Windows messenging thread.
-	m_pHookThread = new std::thread(&CDirectXWrapper::Hook, this);
-	m_pHookThread->detach();
 }
 
 CDirectXWrapper::~CDirectXWrapper()
 {
-	UnhookWindowsHookEx(m_hHook);
-	delete m_pHookThread;
+	//
 }
 
 void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
@@ -73,9 +61,9 @@ void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
 	if (bChanged) CreateResources();
 }
 
-Image CDirectXWrapper::LoadImage(const wchar_t *filePath)
+ID3D11ShaderResourceView *CDirectXWrapper::LoadTexture(const wchar_t *filePath)
 {
-	Image texture;
+	ID3D11ShaderResourceView *texture;
 	DX::ThrowIfFailed(
 		CreateWICTextureFromFile(m_d3dDevice.Get(), filePath, nullptr, &texture)
 	);
@@ -83,37 +71,37 @@ Image CDirectXWrapper::LoadImage(const wchar_t *filePath)
 	return texture;
 }
 
-void CDirectXWrapper::ReleaseImage(Image image)
+void CDirectXWrapper::ReleaseTexture(ID3D11ShaderResourceView *texture)
 {
-	image->Release();
-	//delete image;
+	texture->Release();
+	//delete texture;
 }
 
-void CDirectXWrapper::DrawSprite(Image image, float xPosition, float yPosition)
+void CDirectXWrapper::DrawSprite(ID3D11ShaderResourceView *texture, float xPosition, float yPosition, float redBlend, float greenBlend, float blueBlend, float alphaBlend)
 {
-	m_spriteBatch->Draw(image, Vector2{ xPosition, yPosition });
+	m_spriteBatch->Draw(texture, XMFLOAT2{ xPosition, yPosition }, FXMVECTOR{ redBlend, greenBlend, blueBlend, alphaBlend });
 }
 
-Font CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
+IFW1FontWrapper *CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
 {
-	Font font;
+	IFW1FontWrapper *font;
 	m_fw1FontFactory->CreateFontWrapper(m_d3dDevice.Get(), fontFamily, &font);
 
 	return font;
 }
 
-void CDirectXWrapper::ReleaseFont(Font font)
+void CDirectXWrapper::ReleaseFont(IFW1FontWrapper *font)
 {
 	font->Release();
 	//delete font;
 }
 
-void CDirectXWrapper::DrawText(const WCHAR *text, Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
+void CDirectXWrapper::DrawText(const WCHAR *text, IFW1FontWrapper *font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
 {
 	font->DrawString(
 		m_d3dContext.Get(),
 		text, // String
-		size, // Font size
+		size, // IFW1FontWrapper *size
 		x, // X position
 		y, // Y position
 		color, // Text color, 0xAaBbGgRr
@@ -152,7 +140,7 @@ void CDirectXWrapper::Render()
 // TODO: Figure out why the alpha channel is not reflected in the outgoing bitmap.
 HBITMAP CDirectXWrapper::Capture()
 {
-	D3D11_TEXTURE2D_DESC textureDesc = m_renderTargetDesc;
+	auto textureDesc = m_renderTargetDesc;
 	textureDesc.Usage = D3D11_USAGE_STAGING;
 	textureDesc.BindFlags = 0;
 	textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
@@ -170,9 +158,9 @@ HBITMAP CDirectXWrapper::Capture()
 	// Copy subresource data to buffer.
 	static std::vector<uint8_t> buffer;
 	buffer.resize(textureDesc.Width * textureDesc.Height * 4);
-	uint8_t *source = reinterpret_cast<uint8_t *>(mappedSubresource.pData);
-	uint8_t* destination = buffer.data();
-	size_t size = std::min<size_t>(textureDesc.Width * 4, mappedSubresource.RowPitch);
+	auto *source = reinterpret_cast<uint8_t *>(mappedSubresource.pData);
+	auto* destination = buffer.data();
+	auto size = std::min<size_t>(textureDesc.Width * 4, mappedSubresource.RowPitch);
 
 	for (size_t h = 0; h < textureDesc.Height; h++)
 	{
@@ -184,8 +172,8 @@ HBITMAP CDirectXWrapper::Capture()
 	destination -= textureDesc.Width * textureDesc.Height * 4;
 
 	// Copy buffer to bitmap.
-	HDC hDC = GetDC(NULL);
-	HBITMAP	hBitmap = CreateCompatibleBitmap(hDC, textureDesc.Width, textureDesc.Height);
+	auto hDC = GetDC(NULL);
+	auto hBitmap = CreateCompatibleBitmap(hDC, textureDesc.Width, textureDesc.Height);
 	SetBitmapBits(hBitmap, textureDesc.Width * textureDesc.Height * 4, destination);
 	ReleaseDC(NULL, hDC);
 
@@ -240,35 +228,4 @@ void CDirectXWrapper::CreateResources()
 
 	m_depthStencilViewDesc = CD3D11_DEPTH_STENCIL_VIEW_DESC(D3D11_DSV_DIMENSION_TEXTURE2D);
 	DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &m_depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
-}
-//TODO: fix this so that low level keyboard functions work.
-void CDirectXWrapper::Hook()
-{
-	m_hHook = SetWindowsHookEx(WH_KEYBOARD_LL, [](const int nCode, const WPARAM wParam, const LPARAM lParam) {
-		switch (wParam)
-		{
-		case WM_ACTIVATEAPP:
-			Keyboard::ProcessMessage(nCode, wParam, lParam);
-			break;
-		case WM_KEYDOWN:
-		case WM_SYSKEYDOWN:
-		case WM_KEYUP:
-		case WM_SYSKEYUP:
-			Keyboard::ProcessMessage(nCode, wParam, lParam);
-			break;
-		}
-
-		return CallNextHookEx(m_hHook, nCode, wParam, lParam);
-	}, NULL, 0);
-
-	if (m_hHook == NULL)
-	{
-		std::wcout << "Keyboard hook failed!" << std::endl;
-	}
-	else
-	{
-		std::wcout << "Keyboard hooked!" << std::endl;
-	}
-
-	while (GetMessage(NULL, NULL, 0, 0));
 }

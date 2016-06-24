@@ -14,9 +14,6 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-typedef ID3D11ShaderResourceView *Image;
-typedef IFW1FontWrapper *Font;
-
 // "I'm not a wrapper."
 class CDirectXWrapper
 {
@@ -28,15 +25,13 @@ public:
 	int GetHeight() { return m_iHeight; }
 	void SetResolution(int iWidth, int iHeight);
 
-	Keyboard::State GetKeyboardState() { return m_keyboard->GetState(); }
+	ID3D11ShaderResourceView *LoadTexture(const wchar_t *filePath);
+	void ReleaseTexture(ID3D11ShaderResourceView *texture);
+	void DrawSprite(ID3D11ShaderResourceView *texture, float xPosition, float yPosition, float redBlend, float greenBlend, float blueBlend, float alphaBlend);
 
-	Image LoadImage(const wchar_t *filePath);
-	void ReleaseImage(Image image);
-	void DrawSprite(Image image, float xPosition, float yPosition);
-
-	Font LoadFont(LPCWSTR fontFamily);
-	void ReleaseFont(Font font);
-	void DrawText(const WCHAR *text, Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color);
+	IFW1FontWrapper *LoadFont(LPCWSTR fontFamily);
+	void ReleaseFont(IFW1FontWrapper *font);
+	void DrawText(const WCHAR *text, IFW1FontWrapper *font, FLOAT size, FLOAT x, FLOAT y, UINT32 color);
 
 	void Clear();
 	void BeginSpriteBatch();
@@ -45,10 +40,6 @@ public:
 	HBITMAP Capture();
 	void Screenshot(LPCWSTR fileName);
 protected:
-	// Windows
-	static HHOOK m_hHook;
-	static std::thread *m_pHookThread;
-
 	int m_iWidth;
 	int m_iHeight;
 
@@ -73,14 +64,10 @@ protected:
 	// DirectX Tool Kit
 	std::unique_ptr<CommonStates> m_commonStates;
 	std::unique_ptr<SpriteBatch> m_spriteBatch;
-	std::unique_ptr<Keyboard> m_keyboard;
-	std::unique_ptr<GamePad> m_gamePad;
 
-	// FW1 Font Wrapper
+	// FW1 IFW1FontWrapper *Wrapper
 	ComPtr<IFW1Factory> m_fw1FontFactory;
 
 	void CreateDevice();
 	void CreateResources();
-
-	void Hook();
 };

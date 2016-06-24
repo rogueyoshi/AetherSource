@@ -37,15 +37,15 @@ CFactoryTemplate g_Templates[] =
 		NAME(PROJECT_NAME), // Name
 		&CLSID_Filter, // CLSID
 		[](IUnknown *pUnk, HRESULT *pHr) -> CUnknown * { // Method to create an instance of AetherSource
-		CFilter *pFilter = new CFilter(pUnk, pHr);
+	auto *pFilter = new CFilter(pUnk, pHr);
 
-		if (pHr)
-		{
-			if (pFilter == NULL)
-				*pHr = E_OUTOFMEMORY;
-			else
-				*pHr = S_OK;
-		}
+	if (pHr)
+	{
+		if (pFilter == NULL)
+			*pHr = E_OUTOFMEMORY;
+		else
+			*pHr = S_OK;
+	}
 
 	return pFilter;
 },
@@ -67,7 +67,7 @@ REGFILTER2 g_rf2 =
 
 STDAPI DllUnregisterServer()
 {
-	HRESULT hr = AMovieDllRegisterServer2(FALSE);
+	auto hr = AMovieDllRegisterServer2(FALSE);
 	if (FAILED(hr))	return hr;
 
 	IFilterMapper2 *pFM2 = NULL;
@@ -87,7 +87,7 @@ STDAPI DllUnregisterServer()
 
 STDAPI DllRegisterServer()
 {
-	HRESULT hr = AMovieDllRegisterServer2(TRUE);
+	auto hr = AMovieDllRegisterServer2(TRUE);
 	if (FAILED(hr)) return hr;
 
 	IFilterMapper2 *pFM2 = NULL;

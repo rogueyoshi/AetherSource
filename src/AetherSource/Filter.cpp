@@ -1,6 +1,6 @@
 #include "Filter.h"
 #include "Guids.h"
-#include "guicon.h"
+#include "GuiCon.h"
 
 CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
 	: CSource(NAME("Filter"), pUnk, CLSID_Filter)
@@ -61,7 +61,7 @@ STDMETHODIMP CFilter::Stop()
 
 	for (int i = 0; i < m_iPins; i++)
 	{
-		CPin *pPin = (CPin *)&m_paStreams[i];
+		auto pPin = (CPin *)&m_paStreams[i];
 		pPin->resetResources();
 	}
 
