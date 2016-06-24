@@ -16,9 +16,6 @@ using namespace DirectX;
 
 namespace DX
 {
-	typedef ID3D11ShaderResourceView *Image;
-	typedef IFW1FontWrapper *Font;
-
 	inline void ThrowIfFailed(HRESULT hr)
 	{
 		if (FAILED(hr))
@@ -40,13 +37,13 @@ public:
 	int GetHeight() { return m_iHeight; }
 	void SetResolution(int iWidth, int iHeight);
 
-	DX::Image LoadImage(const wchar_t *filePath);
-	void ReleaseImage(DX::Image image);
-	void DrawSprite(DX::Image image, float xPosition, float yPosition);
+	ID3D11ShaderResourceView * LoadImage(const wchar_t *filePath);
+	void ReleaseImage(ID3D11ShaderResourceView * image);
+	void DrawSprite(ID3D11ShaderResourceView * image, float xPosition, float yPosition, float red, float green, float blue, float alpha);
 
-	DX::Font LoadFont(LPCWSTR fontFamily);
-	void ReleaseFont(DX::Font font);
-	void DrawText(const WCHAR *text, DX::Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color);
+	IFW1FontWrapper * LoadFont(LPCWSTR fontFamily);
+	void ReleaseFont(IFW1FontWrapper * font);
+	void DrawText(const WCHAR *text, IFW1FontWrapper * font, FLOAT size, FLOAT x, FLOAT y, UINT32 color);
 
 	void Clear();
 	void BeginSpriteBatch();
@@ -80,7 +77,7 @@ protected:
 	std::unique_ptr<CommonStates> m_commonStates;
 	std::unique_ptr<SpriteBatch> m_spriteBatch;
 
-	// FW1 DX::Font Wrapper
+	// FW1 IFW1FontWrapper * Wrapper
 	ComPtr<IFW1Factory> m_fw1FontFactory;
 
 	void CreateDevice();

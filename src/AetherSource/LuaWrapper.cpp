@@ -19,7 +19,7 @@ namespace NLuaWrapper
 
 	int dispatch(lua_State *L)
 	{
-		CLuaWrapper *pointer = *static_cast<CLuaWrapper**>(lua_getextraspace(L));
+		auto pointer = *static_cast<CLuaWrapper**>(lua_getextraspace(L));
 
 		return ((*pointer).*function)(L);
 	}
@@ -198,16 +198,16 @@ int CLuaWrapper::LuaGetFPS(lua_State *L)
 
 int CLuaWrapper::LuaSetResolution(lua_State *L)
 {
-	SetResolution((int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2));
-	SetFPS((int)luaL_checkinteger(L, 3));
+	SetResolution(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
+	SetFPS(luaL_checkinteger(L, 3));
 
 	return 0;
 }
 
 int CLuaWrapper::LuaGetDisplayWidth(lua_State *L)
 {
-	HDC hDC = GetDC(NULL);
-	int width = GetDeviceCaps(hDC, HORZRES);
+	auto hDC = GetDC(NULL);
+	auto width = GetDeviceCaps(hDC, HORZRES);
 	ReleaseDC(NULL, hDC);
 
 	lua_pushinteger(L, width);
@@ -217,8 +217,8 @@ int CLuaWrapper::LuaGetDisplayWidth(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayHeight(lua_State *L)
 {
-	HDC hDC = GetDC(NULL);
-	int height = GetDeviceCaps(hDC, VERTRES);
+	auto hDC = GetDC(NULL);
+	auto height = GetDeviceCaps(hDC, VERTRES);
 	ReleaseDC(NULL, hDC);
 
 	lua_pushinteger(L, height);
@@ -228,8 +228,8 @@ int CLuaWrapper::LuaGetDisplayHeight(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayFrequency(lua_State *L)
 {
-	HDC hDC = GetDC(NULL);
-	int frequency = GetDeviceCaps(hDC, VREFRESH);
+	auto hDC = GetDC(NULL);
+	auto frequency = GetDeviceCaps(hDC, VREFRESH);
 	ReleaseDC(NULL, hDC);
 
 	lua_pushinteger(L, frequency);
@@ -239,9 +239,9 @@ int CLuaWrapper::LuaGetDisplayFrequency(lua_State *L)
 
 int CLuaWrapper::LuaLoadImage(lua_State *L)
 {
-	const char *filePath = luaL_checkstring(L, 1);
+	auto filePath = luaL_checkstring(L, 1);
 
-	DX::Image image = m_pDirectXWrapper->LoadImage(to_wstring(filePath).c_str());
+	auto image = m_pDirectXWrapper->LoadImage(to_wstring(filePath).c_str());
 
 	lua_pushlightuserdata(L, image);
 
@@ -250,7 +250,7 @@ int CLuaWrapper::LuaLoadImage(lua_State *L)
 
 int CLuaWrapper::LuaReleaseImage(lua_State * L)
 {
-	DX::Image image = (DX::Image)lua_touserdata(L, 1);
+	auto image = (ID3D11ShaderResourceView *)lua_touserdata(L, 1);
 
 	m_pDirectXWrapper->ReleaseImage(image);
 
@@ -276,14 +276,22 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	lua_getfield(L, 1, "image");
 	lua_getfield(L, 1, "x");
 	lua_getfield(L, 1, "y");
+	lua_getfield(L, 1, "red");
+	lua_getfield(L, 1, "green");
+	lua_getfield(L, 1, "blue");
+	lua_getfield(L, 1, "alpha");
 
 	// Get arguments
-	DX::Image image = (DX::Image)lua_touserdata(L, -3);
-	double xPosition = luaL_checknumber(L, -2);
-	double yPosition = luaL_checknumber(L, -1);
-	
+	auto image = (ID3D11ShaderResourceView *)lua_touserdata(L, -7);
+	auto xPosition = luaL_checknumber(L, -6);
+	auto yPosition = luaL_checknumber(L, -5);
+	auto red = luaL_optnumber(L, -4, 1.0);
+	auto green = luaL_optnumber(L, -3, 1.0);
+	auto blue = luaL_optnumber(L, -2, 1.0);
+	auto alpha = luaL_optnumber(L, -1, 1.0);
+
 	// Draw sprite
-    m_pDirectXWrapper->DrawSprite(image, float(xPosition), float(yPosition));
+    m_pDirectXWrapper->DrawSprite(image, xPosition, yPosition, red, green, blue, alpha);
 
 	//
 	lua_pop(L, 3);
@@ -296,9 +304,9 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 
 int CLuaWrapper::LuaLoadFont(lua_State * L)
 {
-	const char *fontFamily = luaL_checkstring(L, 1);
+	auto fontFamily = luaL_checkstring(L, 1);
 
-	DX::Font font = m_pDirectXWrapper->LoadFont(to_wstring(fontFamily).c_str());
+	auto font = m_pDirectXWrapper->LoadFont(to_wstring(fontFamily).c_str());
 
 	lua_pushlightuserdata(L, font);
 
@@ -307,7 +315,7 @@ int CLuaWrapper::LuaLoadFont(lua_State * L)
 
 int CLuaWrapper::LuaReleaseFont(lua_State * L)
 {
-	DX::Font font = (DX::Font)lua_touserdata(L, 1);
+	auto font = (IFW1FontWrapper *)lua_touserdata(L, 1);
 
 	m_pDirectXWrapper->ReleaseFont(font);
 
@@ -338,14 +346,14 @@ int CLuaWrapper::LuaDrawText(lua_State * L)
 	lua_getfield(L, 1, "color");
 
 	// Get arguments
-	const char *text = luaL_checkstring(L, -6);
-	DX::Font font = (DX::Font)lua_touserdata(L, -5);
-	double size = luaL_checknumber(L, -4);
-	double x = luaL_checknumber(L, -3);
-	double y = luaL_checknumber(L, -2);
-	long long color = luaL_optinteger(L, -1, 0xFFFFFFFF);
+	auto text = luaL_checkstring(L, -6);
+	auto font = (IFW1FontWrapper *)lua_touserdata(L, -5);
+	auto size = luaL_checknumber(L, -4);
+	auto x = luaL_checknumber(L, -3);
+	auto y = luaL_checknumber(L, -2);
+	auto color = luaL_optinteger(L, -1, 0xFFFFFFFF);
 
-	m_pDirectXWrapper->DrawText(to_wstring(text).c_str(), font, float(size), float(x), float(y), UINT32(color));
+	m_pDirectXWrapper->DrawText(to_wstring(text).c_str(), font, size, x, y, color);
 
 	lua_pop(L, 6);
 

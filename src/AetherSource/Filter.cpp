@@ -61,7 +61,7 @@ STDMETHODIMP CFilter::Stop()
 
 	for (int i = 0; i < m_iPins; i++)
 	{
-		CPin *pPin = (CPin *)&m_paStreams[i];
+		auto pPin = (CPin *)&m_paStreams[i];
 		pPin->resetResources();
 	}
 

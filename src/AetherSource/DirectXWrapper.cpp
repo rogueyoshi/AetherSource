@@ -50,9 +50,9 @@ void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
 	if (bChanged) CreateResources();
 }
 
-DX::Image CDirectXWrapper::LoadImage(const wchar_t *filePath)
+ID3D11ShaderResourceView * CDirectXWrapper::LoadImage(const wchar_t *filePath)
 {
-	DX::Image texture;
+	ID3D11ShaderResourceView * texture;
 	DX::ThrowIfFailed(
 		CreateWICTextureFromFile(m_d3dDevice.Get(), filePath, nullptr, &texture)
 	);
@@ -60,37 +60,37 @@ DX::Image CDirectXWrapper::LoadImage(const wchar_t *filePath)
 	return texture;
 }
 
-void CDirectXWrapper::ReleaseImage(DX::Image image)
+void CDirectXWrapper::ReleaseImage(ID3D11ShaderResourceView * image)
 {
 	image->Release();
 	//delete image;
 }
 
-void CDirectXWrapper::DrawSprite(DX::Image image, float xPosition, float yPosition)
+void CDirectXWrapper::DrawSprite(ID3D11ShaderResourceView * image, float xPosition, float yPosition, float red, float green, float blue, float alpha)
 {
-	m_spriteBatch->Draw(image, Vector2{ xPosition, yPosition });
+	m_spriteBatch->Draw(image, XMFLOAT2{ xPosition, yPosition }, FXMVECTOR{ red, green, blue, alpha });
 }
 
-DX::Font CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
+IFW1FontWrapper * CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
 {
-	DX::Font font;
+	IFW1FontWrapper * font;
 	m_fw1FontFactory->CreateFontWrapper(m_d3dDevice.Get(), fontFamily, &font);
 
 	return font;
 }
 
-void CDirectXWrapper::ReleaseFont(DX::Font font)
+void CDirectXWrapper::ReleaseFont(IFW1FontWrapper * font)
 {
 	font->Release();
 	//delete font;
 }
 
-void CDirectXWrapper::DrawText(const WCHAR *text, DX::Font font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
+void CDirectXWrapper::DrawText(const WCHAR *text, IFW1FontWrapper * font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
 {
 	font->DrawString(
 		m_d3dContext.Get(),
 		text, // String
-		size, // DX::Font size
+		size, // IFW1FontWrapper * size
 		x, // X position
 		y, // Y position
 		color, // Text color, 0xAaBbGgRr
@@ -129,7 +129,7 @@ void CDirectXWrapper::Render()
 // TODO: Figure out why the alpha channel is not reflected in the outgoing bitmap.
 HBITMAP CDirectXWrapper::Capture()
 {
-	D3D11_TEXTURE2D_DESC textureDesc = m_renderTargetDesc;
+	auto textureDesc = m_renderTargetDesc;
 	textureDesc.Usage = D3D11_USAGE_STAGING;
 	textureDesc.BindFlags = 0;
 	textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
@@ -147,9 +147,9 @@ HBITMAP CDirectXWrapper::Capture()
 	// Copy subresource data to buffer.
 	static std::vector<uint8_t> buffer;
 	buffer.resize(textureDesc.Width * textureDesc.Height * 4);
-	uint8_t *source = reinterpret_cast<uint8_t *>(mappedSubresource.pData);
-	uint8_t* destination = buffer.data();
-	size_t size = std::min<size_t>(textureDesc.Width * 4, mappedSubresource.RowPitch);
+	auto *source = reinterpret_cast<uint8_t *>(mappedSubresource.pData);
+	auto* destination = buffer.data();
+	auto size = std::min<size_t>(textureDesc.Width * 4, mappedSubresource.RowPitch);
 
 	for (size_t h = 0; h < textureDesc.Height; h++)
 	{
@@ -161,8 +161,8 @@ HBITMAP CDirectXWrapper::Capture()
 	destination -= textureDesc.Width * textureDesc.Height * 4;
 
 	// Copy buffer to bitmap.
-	HDC hDC = GetDC(NULL);
-	HBITMAP	hBitmap = CreateCompatibleBitmap(hDC, textureDesc.Width, textureDesc.Height);
+	auto hDC = GetDC(NULL);
+	auto hBitmap = CreateCompatibleBitmap(hDC, textureDesc.Width, textureDesc.Height);
 	SetBitmapBits(hBitmap, textureDesc.Width * textureDesc.Height * 4, destination);
 	ReleaseDC(NULL, hDC);
 
