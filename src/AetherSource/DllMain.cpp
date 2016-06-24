@@ -37,15 +37,15 @@ CFactoryTemplate g_Templates[] =
 		NAME(PROJECT_NAME), // Name
 		&CLSID_Filter, // CLSID
 		[](IUnknown *pUnk, HRESULT *pHr) -> CUnknown * { // Method to create an instance of AetherSource
-		CFilter *pFilter = new CFilter(pUnk, pHr);
+	CFilter *pFilter = new CFilter(pUnk, pHr);
 
-		if (pHr)
-		{
-			if (pFilter == NULL)
-				*pHr = E_OUTOFMEMORY;
-			else
-				*pHr = S_OK;
-		}
+	if (pHr)
+	{
+		if (pFilter == NULL)
+			*pHr = E_OUTOFMEMORY;
+		else
+			*pHr = S_OK;
+	}
 
 	return pFilter;
 },

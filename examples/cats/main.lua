@@ -29,19 +29,17 @@ local text = ""
 
 local eventShiftPressed = RegisterEvent
 {
-	conditions = {
-		function () return Keyboard.Shift == true end
-	},
-	callback = function () text = "Shift" end
+	condition = function () return Keyboard.Shift == true end,
+	callback = function () text = "Keyboard.Shift == true" end,
+	once = true
 }
 
 local eventShiftReleased = RegisterEvent
 {
-	conditions = {
-		function () return Keyboard.Shift == false end
-	},
-	callback = function () text = "~Shift" end,
-	triggered = false
+	condition = function () return Keyboard.Shift == false end,
+	callback = function () text = "Keyboard.Shift == false" end,
+	once = true,
+	before = true
 }
 
 --
@@ -83,8 +81,8 @@ function OnRender(deltaTime)
 		text = text,
 		font = font,
 		size = 128,
-		x = 100,
-		y = 50,
+		x = 0,
+		y = 0,
 		color = 0xFF0099FF
 	}
 end

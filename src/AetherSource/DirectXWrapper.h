@@ -18,6 +18,15 @@ namespace DX
 {
 	typedef ID3D11ShaderResourceView *Image;
 	typedef IFW1FontWrapper *Font;
+
+	inline void ThrowIfFailed(HRESULT hr)
+	{
+		if (FAILED(hr))
+		{
+			// Set a breakpoint on this line to catch DirectX API errors
+			throw std::exception();
+		}
+	}
 }
 
 // "I'm not a wrapper."

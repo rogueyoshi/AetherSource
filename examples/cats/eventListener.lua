@@ -13,18 +13,20 @@ end
 
 function ProcessEvents ()
 	for _, event in pairs(events) do
-		for _, condition in pairs(event.conditions) do
-			if condition() then
-				event.triggered = true
-			else
-				event.triggered = false
-				event.triggeredBefore = false
-				break
-			end
+		if event.condition() then
+			event.triggered = true
+		else
+			event.triggered = false
+			event.before = false
 		end
-		if event.triggered and not event.triggeredBefore then
+		
+		if event.once then 
+			if event.triggered and not event.before then
+				event.callback()
+				event.before = true
+			end
+		else
 			event.callback()
-			event.triggeredBefore = true
 		end
 	end
 end
