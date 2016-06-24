@@ -32,7 +32,7 @@ local eventShiftPressed = registerEvent
 	conditions = {
 		function () return Keyboard.Shift == true end
 	},
-	callback = function () text = "triggered" end
+	callback = function () text = "Shift" end
 }
 
 local eventShiftReleased = registerEvent
@@ -40,7 +40,7 @@ local eventShiftReleased = registerEvent
 	conditions = {
 		function () return Keyboard.Shift == false end
 	},
-	callback = function () text = "not triggered" end,
+	callback = function () text = "~Shift" end,
 	triggered = false
 }
 
