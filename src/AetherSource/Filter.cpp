@@ -1,6 +1,6 @@
 #include "Filter.h"
 #include "Guids.h"
-#include "guicon.h"
+#include "GuiCon.h"
 
 CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
 	: CSource(NAME("Filter"), pUnk, CLSID_Filter)

@@ -1,5 +1,13 @@
+require("EventListener")
+
+--
+-- Setup Filter
+--
+
+--
 SetResolution(GetDisplayWidth(), GetDisplayHeight(), 30);
 
+--
 local catImage = LoadImage('cat.png')
 
 local cats = {}
@@ -14,23 +22,50 @@ for i = 1, 32 do
 	table.insert(cats, cat)
 end
 
+--
 local font = LoadFont("Arial")
 
-local time = 0
+local text = ""
+
+local eventShiftPressed = registerEvent
+{
+	conditions = {
+		function () return Keyboard.Shift == true end
+	},
+	callback = function () text = "triggered" end
+}
+
+local eventShiftReleased = registerEvent
+{
+	conditions = {
+		function () return Keyboard.Shift == false end
+	},
+	callback = function () text = "not triggered" end,
+	triggered = false
+}
+
+--
+local elapsedTime = 0
+
+--
+-- Source Filter Callbacks
+--
 
 function OnDestroy()
-	ReleaseImage(catImage)
+	unregisterEvent(eventShiftReleased)
+	unregisterEvent(eventShiftPressed)
 	ReleaseFont(font)
+	ReleaseImage(catImage)
 end
 
 function OnUpdate(deltaTime)
-	print(Keyboard.Shift, Keyboard.Control, Keyboard.Alt, Keyboard.System)
+	processEvents()
 
 	for _, cat in pairs(cats) do
 		--
 	end
 	
-	time = time + deltaTime
+	elapsedTime = elapsedTime + deltaTime
 end
 
 function OnRender(deltaTime)	
@@ -38,14 +73,14 @@ function OnRender(deltaTime)
 		DrawSprite
 		{
 			image = cat.image,
-			x = cat.xPosition + math.sin(time * 8) * 16,
-			y = cat.yPosition + math.sin(time * 4) * 16
+			x = cat.xPosition + math.sin(elapsedTime * 8) * 16,
+			y = cat.yPosition + math.sin(elapsedTime * 4) * 16
 		}
 	end
 	
 	DrawText
 	{
-		text = 'Hello, world!',
+		text = text,
 		font = font,
 		size = 128,
 		x = 100,
