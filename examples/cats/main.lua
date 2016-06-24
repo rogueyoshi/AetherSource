@@ -27,19 +27,19 @@ local font = LoadFont("Arial")
 
 local text = ""
 
-local onceShiftPressed = RegisterEvent
-{
-	condition = function () return Keyboard.Shift == true end,
-	callback = function () print "Keyboard.Shift == true" end,
-	once = true
-}
-
 local onceShiftReleased = RegisterEvent
 {
 	condition = function () return Keyboard.Shift == false end,
-	callback = function () print "Keyboard.Shift == false" end,
+	callback = function () text = "Keyboard.Shift == false" end,
 	once = true,
 	before = true
+}
+
+local onceShiftPressed = RegisterEvent
+{
+	condition = function () return Keyboard.Shift == true end,
+	callback = function () text = "Keyboard.Shift == true" end,
+	once = true
 }
 
 --
@@ -50,8 +50,8 @@ local elapsedTime = 0
 --
 
 function OnDestroy()
-	UnregisterEvent(onceShiftReleased)
 	UnregisterEvent(onceShiftPressed)
+	UnregisterEvent(onceShiftReleased)
 	ReleaseFont(font)
 	ReleaseTexture(catTexture)
 end
@@ -67,12 +67,12 @@ function OnUpdate(deltaTime)
 end
 
 function OnRender(deltaTime)	
-	for _, cat in pairs(cats) do
+	for i, cat in pairs(cats) do
 		DrawSprite
 		{
 			texture = cat.texture,
-			xPosition = cat.xPosition + math.sin(elapsedTime * 8) * 16,
-			yPosition = cat.yPosition + math.sin(elapsedTime * 4) * 16
+			xPosition = cat.xPosition + math.sin(i / #cats * elapsedTime * 8) * 16,
+			yPosition = cat.yPosition + math.sin(i / #cats * elapsedTime * 4) * 16
 		}
 	end
 	
