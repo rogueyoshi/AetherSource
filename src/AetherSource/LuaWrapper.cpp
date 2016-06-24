@@ -275,7 +275,7 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	// into an appropriate C type.
 	lua_getfield(L, 1, "image");
 	lua_getfield(L, 1, "xPosition");
-	lua_getfield(L, 1, "xPosition");
+	lua_getfield(L, 1, "yPosition");
 	lua_getfield(L, 1, "redBlend");
 	lua_getfield(L, 1, "greenBlend");
 	lua_getfield(L, 1, "blueBlend");

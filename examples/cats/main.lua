@@ -71,8 +71,8 @@ function OnRender(deltaTime)
 		DrawSprite
 		{
 			image = cat.image,
-			x = cat.xPosition + math.sin(elapsedTime * 8) * 16,
-			y = cat.yPosition + math.sin(elapsedTime * 4) * 16
+			xPosition = cat.xPosition + math.sin(elapsedTime * 8) * 16,
+			yPosition = cat.yPosition + math.sin(elapsedTime * 4) * 16
 		}
 	end
 	
