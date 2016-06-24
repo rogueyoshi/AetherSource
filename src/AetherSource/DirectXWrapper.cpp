@@ -50,9 +50,9 @@ void CDirectXWrapper::SetResolution(int iWidth, int iHeight)
 	if (bChanged) CreateResources();
 }
 
-ID3D11ShaderResourceView * CDirectXWrapper::LoadImage(const wchar_t *filePath)
+ID3D11ShaderResourceView *CDirectXWrapper::LoadImage(const wchar_t *filePath)
 {
-	ID3D11ShaderResourceView * texture;
+	ID3D11ShaderResourceView *texture;
 	DX::ThrowIfFailed(
 		CreateWICTextureFromFile(m_d3dDevice.Get(), filePath, nullptr, &texture)
 	);
@@ -60,37 +60,37 @@ ID3D11ShaderResourceView * CDirectXWrapper::LoadImage(const wchar_t *filePath)
 	return texture;
 }
 
-void CDirectXWrapper::ReleaseImage(ID3D11ShaderResourceView * image)
+void CDirectXWrapper::ReleaseImage(ID3D11ShaderResourceView *image)
 {
 	image->Release();
 	//delete image;
 }
 
-void CDirectXWrapper::DrawSprite(ID3D11ShaderResourceView * image, float xPosition, float yPosition, float red, float green, float blue, float alpha)
+void CDirectXWrapper::DrawSprite(ID3D11ShaderResourceView *image, float xPosition, float yPosition, float redBlend, float greenBlend, float blueBlend, float alphaBlend)
 {
-	m_spriteBatch->Draw(image, XMFLOAT2{ xPosition, yPosition }, FXMVECTOR{ red, green, blue, alpha });
+	m_spriteBatch->Draw(image, XMFLOAT2{ xPosition, yPosition }, FXMVECTOR{ redBlend, greenBlend, blueBlend, alphaBlend });
 }
 
-IFW1FontWrapper * CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
+IFW1FontWrapper *CDirectXWrapper::LoadFont(LPCWSTR fontFamily)
 {
-	IFW1FontWrapper * font;
+	IFW1FontWrapper *font;
 	m_fw1FontFactory->CreateFontWrapper(m_d3dDevice.Get(), fontFamily, &font);
 
 	return font;
 }
 
-void CDirectXWrapper::ReleaseFont(IFW1FontWrapper * font)
+void CDirectXWrapper::ReleaseFont(IFW1FontWrapper *font)
 {
 	font->Release();
 	//delete font;
 }
 
-void CDirectXWrapper::DrawText(const WCHAR *text, IFW1FontWrapper * font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
+void CDirectXWrapper::DrawText(const WCHAR *text, IFW1FontWrapper *font, FLOAT size, FLOAT x, FLOAT y, UINT32 color)
 {
 	font->DrawString(
 		m_d3dContext.Get(),
 		text, // String
-		size, // IFW1FontWrapper * size
+		size, // IFW1FontWrapper *size
 		x, // X position
 		y, // Y position
 		color, // Text color, 0xAaBbGgRr

@@ -274,24 +274,24 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	// the stack first. Then convert those stack values
 	// into an appropriate C type.
 	lua_getfield(L, 1, "image");
-	lua_getfield(L, 1, "x");
-	lua_getfield(L, 1, "y");
-	lua_getfield(L, 1, "red");
-	lua_getfield(L, 1, "green");
-	lua_getfield(L, 1, "blue");
-	lua_getfield(L, 1, "alpha");
+	lua_getfield(L, 1, "xPosition");
+	lua_getfield(L, 1, "xPosition");
+	lua_getfield(L, 1, "redBlend");
+	lua_getfield(L, 1, "greenBlend");
+	lua_getfield(L, 1, "blueBlend");
+	lua_getfield(L, 1, "alphaBlend");
 
 	// Get arguments
 	auto image = (ID3D11ShaderResourceView *)lua_touserdata(L, -7);
 	auto xPosition = luaL_checknumber(L, -6);
 	auto yPosition = luaL_checknumber(L, -5);
-	auto red = luaL_optnumber(L, -4, 1.0);
-	auto green = luaL_optnumber(L, -3, 1.0);
-	auto blue = luaL_optnumber(L, -2, 1.0);
-	auto alpha = luaL_optnumber(L, -1, 1.0);
+	auto redBlend = luaL_optnumber(L, -4, 1.0);
+	auto greenBlend = luaL_optnumber(L, -3, 1.0);
+	auto blueBlend = luaL_optnumber(L, -2, 1.0);
+	auto alphaBlend = luaL_optnumber(L, -1, 1.0);
 
 	// Draw sprite
-    m_pDirectXWrapper->DrawSprite(image, xPosition, yPosition, red, green, blue, alpha);
+    m_pDirectXWrapper->DrawSprite(image, xPosition, yPosition, redBlend, greenBlend, blueBlend, alphaBlend);
 
 	//
 	lua_pop(L, 3);
