@@ -172,10 +172,10 @@ HBITMAP CDirectXWrapper::Capture()
 	destination -= textureDesc.Width * textureDesc.Height * 4;
 
 	// Copy buffer to bitmap.
-	auto hDC = GetDC(NULL);
+	auto hDC = GetDC(nullptr);
 	auto hBitmap = CreateCompatibleBitmap(hDC, textureDesc.Width, textureDesc.Height);
 	SetBitmapBits(hBitmap, textureDesc.Width * textureDesc.Height * 4, destination);
-	ReleaseDC(NULL, hDC);
+	ReleaseDC(nullptr, hDC);
 
 	return hBitmap;
 }
@@ -208,8 +208,8 @@ void CDirectXWrapper::CreateDevice()
 
 void CDirectXWrapper::CreateResources()
 {
-	ID3D11RenderTargetView *nullViews[] = { nullptr };
-	m_d3dContext->OMSetRenderTargets(_countof(nullViews), nullViews, nullptr);
+	ID3D11RenderTargetView *nullptrViews[] = { nullptr };
+	m_d3dContext->OMSetRenderTargets(_countof(nullptrViews), nullptrViews, nullptr);
 	m_renderTargetView.Reset();
 	m_depthStencilView.Reset();
 	m_d3dContext->Flush();

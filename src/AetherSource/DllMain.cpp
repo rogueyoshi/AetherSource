@@ -10,13 +10,13 @@ const AMOVIESETUP_MEDIATYPE g_MediaTypeSetup =
 
 const AMOVIESETUP_PIN g_PinSetup =
 {
-	NULL, // Obsolete, not used.
+	nullptr, // Obsolete, not used.
 	FALSE, // Is this pin rendered?
 	TRUE, // Is it an output pin?
 	FALSE, // Can the filter create zero instances?
 	FALSE, // Does the filter create multiple instances?
 	&CLSID_NULL, // Obsolete.
-	NULL, // Obsolete.
+	nullptr, // Obsolete.
 	1, // Number of media types.
 	&g_MediaTypeSetup // Pointer to media types.
 };
@@ -33,25 +33,11 @@ const AMOVIESETUP_FILTER g_FilterSetup =
 // DirectShow queries for this global
 CFactoryTemplate g_Templates[] =
 {
-	{
-		NAME(PROJECT_NAME), // Name
-		&CLSID_Filter, // CLSID
-		[](IUnknown *pUnk, HRESULT *pHr) -> CUnknown * { // Method to create an instance of AetherSource
-	auto *pFilter = new CFilter(pUnk, pHr);
-
-	if (pHr)
-	{
-		if (pFilter == NULL)
-			*pHr = E_OUTOFMEMORY;
-		else
-			*pHr = S_OK;
-	}
-
-	return pFilter;
-},
-NULL, // Initialization function
-&g_FilterSetup // Set-up information (for filters)
-	}
+	NAME(PROJECT_NAME), // Name
+	&CLSID_Filter, // CLSID
+	CFilter::CreateInstance,
+	nullptr, // Initialization function
+	&g_FilterSetup // Set-up information (for filters)
 };
 
 // DirectShow queries for this global
@@ -70,8 +56,8 @@ STDAPI DllUnregisterServer()
 	auto hr = AMovieDllRegisterServer2(FALSE);
 	if (FAILED(hr))	return hr;
 
-	IFilterMapper2 *pFM2 = NULL;
-	hr = CoCreateInstance(CLSID_FilterMapper2, NULL, CLSCTX_INPROC_SERVER, IID_IFilterMapper2, (void **)&pFM2);
+	IFilterMapper2 *pFM2 = nullptr;
+	hr = CoCreateInstance(CLSID_FilterMapper2, nullptr, CLSCTX_INPROC_SERVER, IID_IFilterMapper2, (void **)&pFM2);
 	if (FAILED(hr))	return hr;
 
 	hr = pFM2->UnregisterFilter(
@@ -90,16 +76,16 @@ STDAPI DllRegisterServer()
 	auto hr = AMovieDllRegisterServer2(TRUE);
 	if (FAILED(hr)) return hr;
 
-	IFilterMapper2 *pFM2 = NULL;
-	hr = CoCreateInstance(CLSID_FilterMapper2, NULL, CLSCTX_INPROC_SERVER, IID_IFilterMapper2, (void **)&pFM2);
+	IFilterMapper2 *pFM2 = nullptr;
+	hr = CoCreateInstance(CLSID_FilterMapper2, nullptr, CLSCTX_INPROC_SERVER, IID_IFilterMapper2, (void **)&pFM2);
 	if (FAILED(hr)) return hr;
 
 	hr = pFM2->RegisterFilter(
 		CLSID_Filter, // Filter CLSID. 
 		NAME(PROJECT_NAME), // Filter name.
-		NULL, // Device moniker. 
+		nullptr, // Device moniker. 
 		&CLSID_VideoInputDeviceCategory, // Video compressor category.
-		NULL, // Instance data.
+		nullptr, // Instance data.
 		&g_rf2 // Pointer to filter information.
 	);
 

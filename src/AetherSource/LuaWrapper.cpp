@@ -27,7 +27,7 @@ namespace NLuaWrapper
 
 CLuaWrapper::CLuaWrapper() :
 	m_iFPS(MINIMUM_FPS),
-	m_pLuaState(NULL)
+	m_pLuaState(nullptr)
 {
 	m_pDirectXWrapper = new CDirectXWrapper();
 }
@@ -41,7 +41,7 @@ CLuaWrapper::~CLuaWrapper()
 
 bool CLuaWrapper::IsOpen()
 {
-	return (m_pLuaState != NULL);
+	return (m_pLuaState != nullptr);
 }
 
 bool CLuaWrapper::Close()
@@ -49,7 +49,7 @@ bool CLuaWrapper::Close()
 	if (IsOpen())
 	{
 		lua_close(m_pLuaState);
-		m_pLuaState = NULL;
+		m_pLuaState = nullptr;
 
 		return true;
 	}
@@ -206,9 +206,9 @@ int CLuaWrapper::LuaSetResolution(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayWidth(lua_State *L)
 {
-	auto hDC = GetDC(NULL);
+	auto hDC = GetDC(nullptr);
 	auto width = GetDeviceCaps(hDC, HORZRES);
-	ReleaseDC(NULL, hDC);
+	ReleaseDC(nullptr, hDC);
 
 	lua_pushinteger(L, width);
 
@@ -217,9 +217,9 @@ int CLuaWrapper::LuaGetDisplayWidth(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayHeight(lua_State *L)
 {
-	auto hDC = GetDC(NULL);
+	auto hDC = GetDC(nullptr);
 	auto height = GetDeviceCaps(hDC, VERTRES);
-	ReleaseDC(NULL, hDC);
+	ReleaseDC(nullptr, hDC);
 
 	lua_pushinteger(L, height);
 
@@ -228,9 +228,9 @@ int CLuaWrapper::LuaGetDisplayHeight(lua_State *L)
 
 int CLuaWrapper::LuaGetDisplayFrequency(lua_State *L)
 {
-	auto hDC = GetDC(NULL);
+	auto hDC = GetDC(nullptr);
 	auto frequency = GetDeviceCaps(hDC, VREFRESH);
-	ReleaseDC(NULL, hDC);
+	ReleaseDC(nullptr, hDC);
 
 	lua_pushinteger(L, frequency);
 

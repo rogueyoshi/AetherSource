@@ -26,8 +26,8 @@ CPin::CPin(HRESULT *pHr, CSource *pFilter) : CSourceStream(NAME("Pin"), pHr, pFi
 
 	static auto *pFileDialog = new OpenFileDialog();
 	pFileDialog->Title = TEXT("Open Lua script");
-	//pFileDialog->DefaultExtension = TEXT(".lua");
-	pFileDialog->Filter = TEXT(".lua");
+	//pFileDialog->DefaultExtension = TEXT("*.lua");
+	pFileDialog->Filter = TEXT("Lua scripts (*.lua)\0*.lua;";);
 
 	if (!_tcslen(pFileDialog->FileName)) pFileDialog->ShowDialog();
 	
@@ -43,7 +43,7 @@ CPin::CPin(HRESULT *pHr, CSource *pFilter) : CSourceStream(NAME("Pin"), pHr, pFi
 	m_rtFrameLength = FPS(m_pLuaWrapper->GetFPS());
 
 	/*HDC hDc;
-	hDc = CreateDC(NAME("DISPLAY"), NULL, NULL, NULL);
+	hDc = CreateDC(NAME("DISPLAY"), nullptr, nullptr, nullptr);
 	m_iCurrentBitDepth = GetDeviceCaps(hDc, BITSPIXEL);
 	DeleteDC(hDc);*/
 
@@ -98,7 +98,7 @@ HRESULT CPin::CheckMediaType(const CMediaType *pMediaType)
 	// Check for the subtypes we support
 	auto SubType = pMediaType->Subtype();
 
-	if (SubType == NULL) return E_INVALIDARG;
+	if (SubType == nullptr) return E_INVALIDARG;
 
 	if (*SubType != MEDIASUBTYPE_RGB32)
 	{
@@ -107,7 +107,7 @@ HRESULT CPin::CheckMediaType(const CMediaType *pMediaType)
 
 	// Get the format area of the media type
 	auto pvi = (VIDEOINFO *)pMediaType->Format();
-	if (pvi == NULL) return E_INVALIDARG;
+	if (pvi == nullptr) return E_INVALIDARG;
 
 	// Don't accept formats with negative height, which would cause the 
 	// image to be displayed upside down.
@@ -209,7 +209,7 @@ HRESULT CPin::SetMediaType(const CMediaType *pMediaType)
 	if (SUCCEEDED(hr))
 	{
 		auto pvi = (VIDEOINFO *)m_mt.Format();
-		if (pvi == NULL) return E_UNEXPECTED;
+		if (pvi == nullptr) return E_UNEXPECTED;
 
 		if (pvi->bmiHeader.biBitCount == 32)
 		{
@@ -310,9 +310,9 @@ HRESULT CPin::FillBuffer(IMediaSample *pSample)
 	// Copy the DIB bits over into our filter's output buffer.
 	// Since sample size may be larger than the image size, bound the copy size.
 	//int nSize = min(pVih->bmiHeader.biSizeImage, (DWORD)cbData);
-	auto hDC = GetDC(NULL);
+	auto hDC = GetDC(nullptr);
 	GetDIBits(hDC, hBitmap, 0, m_pLuaWrapper->GetHeight(), pData, (BITMAPINFO *)&(pVih->bmiHeader), DIB_RGB_COLORS);
-	ReleaseDC(NULL, hDC);
+	ReleaseDC(nullptr, hDC);
 
 	if (hBitmap) DeleteObject(hBitmap);
 
@@ -377,8 +377,8 @@ HRESULT STDMETHODCALLTYPE CPin::SetFormat(AM_MEDIA_TYPE *pMt)
 
 	// "they" [can] call this...see msdn for SetFormat
 
-	// NULL means reset to default type...
-	if (pMt != NULL)
+	// nullptr means reset to default type...
+	if (pMt != nullptr)
 	{
 		if (pMt->formattype != FORMAT_VideoInfo) return E_FAIL;
 
@@ -417,7 +417,7 @@ HRESULT STDMETHODCALLTYPE CPin::SetFormat(AM_MEDIA_TYPE *pMt)
 	}
 
 	// success of some type
-	if (pMt == NULL)
+	if (pMt == nullptr)
 	{
 		//m_bFormatAlreadySet = false;
 	}
@@ -446,7 +446,7 @@ HRESULT STDMETHODCALLTYPE CPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE **pMt, B
 	if (FAILED(hr))	return hr;
 
 	*pMt = CreateMediaType(&m_mt); // a windows lib method, also does a copy for us
-	if (*pMt == NULL) return E_OUTOFMEMORY;
+	if (*pMt == nullptr) return E_OUTOFMEMORY;
 
 	auto pVSCC = (VIDEO_STREAM_CONFIG_CAPS *)(pSCC);
 
@@ -490,10 +490,10 @@ HRESULT CPin::Get(
 {
 	if (guidPropSet != AMPROPSETID_Pin)             return E_PROP_SET_UNSUPPORTED;
 	if (dwPropID != AMPROPERTY_PIN_CATEGORY)        return E_PROP_ID_UNSUPPORTED;
-	if (pPropData == NULL && pcbReturned == NULL)   return E_POINTER;
+	if (pPropData == nullptr && pcbReturned == nullptr)   return E_POINTER;
 
 	if (pcbReturned) *pcbReturned = sizeof(GUID);
-	if (pPropData == NULL)          return S_OK; // Caller just wants to know the size. 
+	if (pPropData == nullptr)          return S_OK; // Caller just wants to know the size. 
 	if (cbPropData < sizeof(GUID))  return E_UNEXPECTED;// The buffer is too small.
 
 	*(GUID *)pPropData = PIN_CATEGORY_CAPTURE; // PIN_CATEGORY_PREVIEW ?

@@ -2,47 +2,19 @@
 #include "Guids.h"
 #include "GuiCon.h"
 
-CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
-	: CSource(NAME("Filter"), pUnk, CLSID_Filter)
+CUnknown * WINAPI CFilter::CreateInstance(IUnknown *pUnk, HRESULT *pHr)
 {
-	redirectIOToConsole();
-	//EnableMenuItem(GetConsoleWindow(), SC_CLOSE, MF_GRAYED);
-	RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
-	SetConsoleTitle(TEXT(PROJECT_NAME));
+	auto *pFilter = new CFilter(pUnk, pHr);
 
-	// The pin magically adds itself to our pin array.
-	//m_pPin = new CPin(pHr, this);
-	new CPin(pHr, this);
 	if (pHr)
 	{
-		/*if (m_pPin == NULL)
-		*pHr = E_OUTOFMEMORY;
+		if (pFilter == nullptr)
+			*pHr = E_OUTOFMEMORY;
 		else
-		*pHr = S_OK;*/
-
-		*pHr = S_OK;
-
-		for (int i = 0; i < m_iPins; i++)
-		{
-			if (m_paStreams[i] == NULL) *pHr = E_OUTOFMEMORY;
-		}
-	}
-}
-
-CFilter::~CFilter()
-{
-	//delete m_pPin;
-
-	for (int i = 0; i < m_iPins; i++)
-	{
-		delete m_paStreams[i];
+			*pHr = S_OK;
 	}
 
-	m_iPins = 0;
-
-	// Deallocate console
-	ShowWindow(GetConsoleWindow(), SW_HIDE);
-	FreeConsole();
+	return pFilter;
 }
 
 STDMETHODIMP CFilter::Run(REFERENCE_TIME tStart)
@@ -88,3 +60,46 @@ HRESULT CFilter::GetState(DWORD dw, FILTER_STATE *pState)
 	else
 		return CSource::QueryInterface(riid, ppv);
 }*/
+
+CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
+	: CSource(NAME("Filter"), pUnk, CLSID_Filter)
+{
+	redirectIOToConsole();
+	//EnableMenuItem(GetConsoleWindow(), SC_CLOSE, MF_GRAYED);
+	RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
+	SetConsoleTitle(TEXT(PROJECT_NAME));
+
+	// The pin magically adds itself to our pin array.
+	//m_pPin = new CPin(pHr, this);
+	new CPin(pHr, this);
+	if (pHr)
+	{
+		/*if (m_pPin == nullptr)
+		*pHr = E_OUTOFMEMORY;
+		else
+		*pHr = S_OK;*/
+
+		*pHr = S_OK;
+
+		for (int i = 0; i < m_iPins; i++)
+		{
+			if (m_paStreams[i] == nullptr) *pHr = E_OUTOFMEMORY;
+		}
+	}
+}
+
+CFilter::~CFilter()
+{
+	//delete m_pPin;
+
+	for (int i = 0; i < m_iPins; i++)
+	{
+		delete m_paStreams[i];
+	}
+
+	m_iPins = 0;
+
+	// Deallocate console
+	ShowWindow(GetConsoleWindow(), SW_HIDE);
+	FreeConsole();
+}
