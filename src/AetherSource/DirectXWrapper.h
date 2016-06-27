@@ -17,28 +17,6 @@ using namespace DirectX;
 // "I'm not a wrapper."
 class CDirectXWrapper
 {
-public:
-	CDirectXWrapper();
-	~CDirectXWrapper();
-
-	int GetWidth() { return m_iWidth; }
-	int GetHeight() { return m_iHeight; }
-	void SetResolution(int iWidth, int iHeight);
-
-	ID3D11ShaderResourceView *LoadTexture(const wchar_t *filePath);
-	void ReleaseTexture(ID3D11ShaderResourceView *texture);
-	void DrawSprite(ID3D11ShaderResourceView *texture, float xPosition, float yPosition, float redBlend, float greenBlend, float blueBlend, float alphaBlend);
-
-	IFW1FontWrapper *LoadFont(LPCWSTR fontFamily);
-	void ReleaseFont(IFW1FontWrapper *font);
-	void DrawText(const WCHAR *text, IFW1FontWrapper *font, FLOAT size, FLOAT x, FLOAT y, UINT32 color);
-
-	void Clear();
-	void BeginSpriteBatch();
-	void EndSpriteBatch();
-	void Render();
-	HBITMAP Capture();
-	void Screenshot(LPCWSTR fileName);
 protected:
 	int m_iWidth;
 	int m_iHeight;
@@ -52,6 +30,8 @@ protected:
 	CD3D11_TEXTURE2D_DESC m_renderTargetDesc;
 	ComPtr<ID3D11Texture2D> m_renderTarget;
 	ComPtr<ID3D11RenderTargetView> m_renderTargetView;
+
+	std::vector<uint8_t> m_iBuffer;
 
 	DXGI_FORMAT m_depthStencilFormat;
 	CD3D11_TEXTURE2D_DESC m_depthStencilDesc;
@@ -70,4 +50,27 @@ protected:
 
 	void CreateDevice();
 	void CreateResources();
+public:
+	CDirectXWrapper();
+	~CDirectXWrapper();
+
+	int GetWidth() { return m_iWidth; }
+	int GetHeight() { return m_iHeight; }
+	void SetResolution(int iWidth, int iHeight);
+
+	void ClearScreen(float redBlend, float greenBlend, float blueBlend, float alphaBlend);
+
+	ID3D11ShaderResourceView *LoadTexture(const wchar_t *filePath);
+	void ReleaseTexture(ID3D11ShaderResourceView *texture);
+	void DrawSprite(ID3D11ShaderResourceView *texture, float xPosition, float yPosition, float redBlend, float greenBlend, float blueBlend, float alphaBlend);
+
+	IFW1FontWrapper *LoadFont(LPCWSTR fontFamily);
+	void ReleaseFont(IFW1FontWrapper *font);
+	void DrawText(const WCHAR *text, IFW1FontWrapper *font, FLOAT size, FLOAT x, FLOAT y, UINT32 color);
+
+	void BeginSpriteBatch();
+	void EndSpriteBatch();
+	void Render();
+	HBITMAP Capture();
+	void Screenshot(LPCWSTR fileName);
 };

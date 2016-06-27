@@ -1,13 +1,13 @@
 #include "OpenFileDialog.h"
 
 OpenFileDialog::OpenFileDialog() :
-	DefaultExtension(NULL),
-	Filter(NULL),
+	DefaultExtension(nullptr),
+	Filter(nullptr),
 	FilterIndex(NULL),
 	Flags(OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST),
-	InitialDir(NULL),
-	Owner(NULL),
-	Title(NULL)
+	InitialDir(nullptr),
+	Owner(nullptr),
+	Title(nullptr)
 {
 	FileName = new TCHAR[MAX_PATH];
 	ZeroMemory(FileName, sizeof(FileName));

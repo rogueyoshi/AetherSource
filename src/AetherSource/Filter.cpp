@@ -2,20 +2,18 @@
 #include "Guids.h"
 #include "GuiCon.h"
 
-CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
-	: CSource(NAME("Filter"), pUnk, CLSID_Filter)
+CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr) : CSource(NAME("Filter"), pUnk, CLSID_Filter)
 {
-	redirectIOToConsole();
-	//EnableMenuItem(GetConsoleWindow(), SC_CLOSE, MF_GRAYED);
-	RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
-	SetConsoleTitle(TEXT(PROJECT_NAME));
+	//redirectIOToConsole();
+	//RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);	//EnableMenuItem(GetConsoleWindow(), SC_CLOSE, MF_GRAYED);
+	//SetConsoleTitle(TEXT(PROJECT_NAME));
 
 	// The pin magically adds itself to our pin array.
 	//m_pPin = new CPin(pHr, this);
 	new CPin(pHr, this);
 	if (pHr)
 	{
-		/*if (m_pPin == NULL)
+		/*if (m_pPin == nullptr)
 		*pHr = E_OUTOFMEMORY;
 		else
 		*pHr = S_OK;*/
@@ -24,7 +22,7 @@ CFilter::CFilter(IUnknown *pUnk, HRESULT *pHr)
 
 		for (int i = 0; i < m_iPins; i++)
 		{
-			if (m_paStreams[i] == NULL) *pHr = E_OUTOFMEMORY;
+			if (m_paStreams[i] == nullptr) *pHr = E_OUTOFMEMORY;
 		}
 	}
 }
@@ -41,20 +39,35 @@ CFilter::~CFilter()
 	m_iPins = 0;
 
 	// Deallocate console
-	ShowWindow(GetConsoleWindow(), SW_HIDE);
-	FreeConsole();
+	//ShowWindow(GetConsoleWindow(), SW_HIDE);
+	//FreeConsole();
+}
+
+CUnknown * WINAPI CFilter::CreateInstance(IUnknown *pUnk, HRESULT *pHr)
+{
+	auto pFilter = new CFilter(pUnk, pHr);
+
+	if (pHr)
+	{
+		if (pFilter == nullptr)
+			*pHr = E_OUTOFMEMORY;
+		else
+			*pHr = S_OK;
+	}
+
+	return pFilter;
 }
 
 STDMETHODIMP CFilter::Run(REFERENCE_TIME tStart)
 {
-	CAutoLock autoLock(m_pLock);
+	CAutoLock autolock(m_pLock);
 
 	return CSource::Run(tStart);
 }
 
 STDMETHODIMP CFilter::Stop()
 {
-	CAutoLock autoLock(m_pLock);
+	CAutoLock autolock(m_pLock);
 
 	//Reset pin resources
 	//m_pPin->m_iFrameNumber = 0;

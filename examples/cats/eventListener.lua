@@ -5,8 +5,8 @@ function RegisterEvent (event)
 	return #events
 end
 
-function UnregisterEvent (event)
-	table.remove(events, event)
+function UnregisterEvent (eventIndex)
+	table.remove(events, eventIndex)
 end
 
 function ProcessEvents ()
