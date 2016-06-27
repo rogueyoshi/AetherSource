@@ -1,13 +1,13 @@
-require("EventListener")
+require('EventListener')
 
 --
 -- Setup
 --
 
---
+-- Mandatory
 SetResolution(GetDisplayWidth(), GetDisplayHeight(), 30);
 
---
+-- Generate some cats
 local catTexture = LoadTexture('cat.png')
 
 local cats = {}
@@ -30,7 +30,7 @@ local text = ""
 local onceShiftReleased = RegisterEvent
 {
 	condition = function () return Keyboard.Shift == false end,
-	callback = function () text = "Keyboard.Shift == false" end,
+	callback = function () text = 'Keyboard.Shift == false' end,
 	once = true,
 	before = true
 }
@@ -38,7 +38,7 @@ local onceShiftReleased = RegisterEvent
 local onceShiftPressed = RegisterEvent
 {
 	condition = function () return Keyboard.Shift == true end,
-	callback = function () text = "Keyboard.Shift == true" end,
+	callback = function () text = 'Keyboard.Shift == true' end,
 	once = true
 }
 
@@ -67,14 +67,23 @@ function OnUpdate(deltaTime)
 end
 
 function OnRender(deltaTime)	
+	ClearScreen
+	{
+		red = 0,
+		green = 0,
+		blue = 0,
+		alpha = 0-- Unsupported, but not for long
+	}
+	
+	-- Draw the cats
 	for i, cat in pairs(cats) do
-		DrawSprite -- Normal image
+		DrawSprite-- Normal image
 		{
 			texture = cat.texture,
 			xPosition = cat.xPosition,
 			yPosition = cat.yPosition
 		}
-		DrawSprite -- After image
+		DrawSprite-- After image
 		{
 			texture = cat.texture,
 			xPosition = cat.xPosition + math.sin(i / #cats * elapsedTime * 8) * 16,
@@ -91,6 +100,6 @@ function OnRender(deltaTime)
 		size = 128,
 		x = 0,
 		y = 0,
-		color = 0xFF0099FF
+		color = 0xFF0099EE
 	}
 end

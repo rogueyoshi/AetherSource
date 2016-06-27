@@ -6,18 +6,40 @@
 
 class CPin : public CSourceStream, public IAMStreamConfig, public IKsPropertySet
 {
+protected:
+	//int m_FramesWritten;				// To track where we are in the file
+	//BOOL m_bZeroMemory;                // Do we need to clear the buffer?
+	//CRefTime m_rtSampleTime;	       // The time stamp for each sample
+
+	int m_iFrameNumber;
+
+	REFERENCE_TIME m_rtFrameLength;
+
+	DWORD m_iPreviousTime;
+	//RECT m_rScreen;                    // Rect containing entire screen coordinates
+
+	//int m_iHeight;                // The current image height
+	//int m_iWidth;                 // And current image width
+	//int m_iCurrentBitDepth;            // Screen bit depth
+	//int m_iRepeatTime;                 // Time in msec between frames
+
+	//CMediaType m_MediaType;
+	//CCritSec m_cSharedState;           // Protects our internal state
+	//CImageDisplay m_Display;           // Figures out our media type for us
+
+	CLuaWrapper *m_pLuaWrapper;
 public:
 	CPin(HRESULT *pHr, CSource *pFilter);
 	~CPin();
 
 	void resetResources();
 
-	//HRESULT OnThreadCreate(void);
-	//HRESULT OnThreadDestroy(void);
+	HRESULT OnThreadCreate(void);
+	HRESULT OnThreadDestroy(void);
 
 	// Support multiple display formats
 	HRESULT CheckMediaType(const CMediaType *pMediaType);
-	HRESULT GetMediaType(int iPosition, CMediaType *pMt);
+	HRESULT GetMediaType(int iPosition, CMediaType *pmt);
 
 	// Set the agreed media type and set up the necessary parameters
 	HRESULT SetMediaType(const CMediaType *pMediaType);
@@ -36,16 +58,16 @@ public:
 	//  IUnknown
 	//////////////////////////////////////////////////////////////////////////
 	STDMETHODIMP QueryInterface(REFIID riid, void **ppv);
-	STDMETHODIMP_(ULONG) AddRef() { return GetOwner()->AddRef(); } // gets called often...
+	STDMETHODIMP_(ULONG) AddRef() { return GetOwner()->AddRef(); }// gets called often...
 	STDMETHODIMP_(ULONG) Release() { return GetOwner()->Release(); }
 
 	//////////////////////////////////////////////////////////////////////////
 	//  IAMStreamConfig
 	//////////////////////////////////////////////////////////////////////////
-	HRESULT STDMETHODCALLTYPE GetFormat(AM_MEDIA_TYPE **ppMt);
-	HRESULT STDMETHODCALLTYPE SetFormat(AM_MEDIA_TYPE *pMt);
+	HRESULT STDMETHODCALLTYPE GetFormat(AM_MEDIA_TYPE **ppmt);
+	HRESULT STDMETHODCALLTYPE SetFormat(AM_MEDIA_TYPE *pmt);
 	HRESULT STDMETHODCALLTYPE GetNumberOfCapabilities(int *piCount, int *piSize);
-	HRESULT STDMETHODCALLTYPE GetStreamCaps(int iIndex, AM_MEDIA_TYPE **ppMt, BYTE *pSCC);
+	HRESULT STDMETHODCALLTYPE GetStreamCaps(int iIndex, AM_MEDIA_TYPE **ppmt, BYTE *pscc);
 
 	//////////////////////////////////////////////////////////////////////////
 	//  IKsPropertySet
@@ -53,25 +75,4 @@ public:
 	HRESULT STDMETHODCALLTYPE Get(REFGUID guidPropSet, DWORD dwPropID, void *pInstanceData, DWORD cbInstanceData, void *pPropData, DWORD cbPropData, DWORD *pcbReturned);
 	HRESULT STDMETHODCALLTYPE Set(REFGUID guidPropSet, DWORD dwID, void *pInstanceData, DWORD cbInstanceData, void *pPropData, DWORD cbPropData);
 	HRESULT STDMETHODCALLTYPE QuerySupported(REFGUID guidPropSet, DWORD dwPropID, DWORD *pTypeSupport);
-protected:
-	//int m_FramesWritten;				// To track where we are in the file
-	//BOOL m_bZeroMemory;                 // Do we need to clear the buffer?
-	//CRefTime m_rtSampleTime;	        // The time stamp for each sample
-
-	int m_iFrameNumber;
-
-	REFERENCE_TIME m_rtFrameLength;
-
-	//RECT m_rScreen;                     // Rect containing entire screen coordinates
-
-	//int m_iHeight;                 // The current image height
-    //int m_iWidth;                  // And current image width
-    //int m_iCurrentBitDepth;             // Screen bit depth
-    //int m_iRepeatTime;                  // Time in msec between frames
-
-    //CMediaType m_MediaType;
-    //CCritSec m_cSharedState;            // Protects our internal state
-    //CImageDisplay m_Display;            // Figures out our media type for us
-
-	CLuaWrapper *m_pLuaWrapper;
 };

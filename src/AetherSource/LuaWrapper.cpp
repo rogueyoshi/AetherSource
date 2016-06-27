@@ -4,7 +4,6 @@
 //#include <functional>
 #include "LuaWrapper.h"
 #include "StringHelper.h"
-#include "../robot/Source/Robot.h"
 
 #define MINIMUM_FPS 6
 
@@ -25,149 +24,26 @@ namespace NLuaWrapper
 	}
 }
 
-CLuaWrapper::CLuaWrapper() :
-	m_iFPS(MINIMUM_FPS),
-	m_pLuaState(nullptr)
-{
-	m_pDirectXWrapper = new CDirectXWrapper();
-}
-
-CLuaWrapper::~CLuaWrapper()
-{
-	Close();
-
-	delete m_pDirectXWrapper;
-}
-
-bool CLuaWrapper::IsOpen()
-{
-	return (m_pLuaState != nullptr);
-}
-
-bool CLuaWrapper::Close()
-{
-	if (IsOpen())
-	{
-		lua_close(m_pLuaState);
-		m_pLuaState = nullptr;
-
-		return true;
-	}
-
-	return false;
-}
-
-bool CLuaWrapper::Open(const char *fn)
-{
-	Close();
-
-	m_pLuaState = luaL_newstate();
-	luaL_openlibs(m_pLuaState);
-
-	// TODO: use std::bind to register lua functions and remove the wrapper.
-	//lua_pushcclosure(m_pLuaState, std::bind(&CLuaWrapper::LuaGetDisplayWidth, this, std::placeholders::_1), 0);
-	//lua_setglobal(m_pLuaState, "GetDisplayWidth");
-
-	*static_cast<CLuaWrapper**>(lua_getextraspace(m_pLuaState)) = this;
-	
-	lua_register(m_pLuaState, "GetDisplayWidth", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetDisplayWidth>);
-	lua_register(m_pLuaState, "GetDisplayHeight", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetDisplayHeight>);
-	lua_register(m_pLuaState, "GetDisplayFrequency", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetDisplayFrequency>);
-	lua_register(m_pLuaState, "SetResolution", &NLuaWrapper::dispatch<&CLuaWrapper::LuaSetResolution>);
-	lua_register(m_pLuaState, "GetWidth", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetWidth>);
-	lua_register(m_pLuaState, "GetHeight", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetHeight>);
-	lua_register(m_pLuaState, "GetFPS", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetFPS>);
-	lua_register(m_pLuaState, "LoadTexture", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadTexture>);
-	lua_register(m_pLuaState, "ReleaseTexture", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseTexture>);
-	lua_register(m_pLuaState, "DrawSprite", &NLuaWrapper::dispatch<&CLuaWrapper::LuaDrawSprite>);
-	lua_register(m_pLuaState, "LoadFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadFont>);
-	lua_register(m_pLuaState, "ReleaseFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseFont>);
-	lua_register(m_pLuaState, "DrawText", &NLuaWrapper::dispatch<&CLuaWrapper::LuaDrawText>);
-	lua_register(m_pLuaState, "LoadSound", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadSound>);
-	lua_register(m_pLuaState, "PlaySound", &NLuaWrapper::dispatch<&CLuaWrapper::LuaPlaySound>);
-
-	if (luaL_dofile(m_pLuaState, fn) != LUA_OK)
-	{
-		Close();
-
-		return false;
-	}
-	
-	return true;
-}
-
-void CLuaWrapper::SetFPS(int iFPS)
-{
-	m_iFPS = std::max(iFPS, MINIMUM_FPS);
-}
-
-void CLuaWrapper::OnDestroy()
-{
-	if (!IsOpen()) return;
-
-	lua_getglobal(m_pLuaState, "OnDestroy");
-
-	lua_call(m_pLuaState, 0, 0);
-}
-
-void CLuaWrapper::OnUpdate(double deltaTime)
-{
-	if (!IsOpen()) return;
-
-	UpdateKeyboard();
-
-	lua_getglobal(m_pLuaState, "OnUpdate");
-	lua_pushnumber(m_pLuaState, deltaTime);
-	lua_call(m_pLuaState, 1, 0);
-}
-
-void CLuaWrapper::OnRender(double deltaTime)
-{
-	if (!IsOpen()) return;
-
-	// Clear render target
-	m_pDirectXWrapper->Clear();
-
-	// Execute draw commands from Lua
-	lua_getglobal(m_pLuaState, "OnRender");
-	lua_pushnumber(m_pLuaState, deltaTime);
-	lua_call(m_pLuaState, 1, 0);
-
-	// Check if sprite batch is still active
-	if (m_previousRenderCall.find("DrawSprite") != std::string::npos)
-	{
-		// End sprite batch
-		m_pDirectXWrapper->EndSpriteBatch();
-	}
-
-	// Render to texture
-	m_pDirectXWrapper->Render();
-
-	// Reset tracked render call
-	m_previousRenderCall = "";
-}
-
 void CLuaWrapper::UpdateKeyboard()
 {
-	static Robot::KeyState s;
-	Robot::Keyboard::GetState(s);
+	Robot::Keyboard::GetState(m_keyState);
 
 	lua_newtable(m_pLuaState);
 
 	lua_pushliteral(m_pLuaState, "Shift");
-	lua_pushboolean(m_pLuaState, s[Robot::Key::KeyShift]);
+	lua_pushboolean(m_pLuaState, m_keyState[Robot::Key::KeyShift]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "Control");
-	lua_pushboolean(m_pLuaState, s[Robot::Key::KeyControl]);
+	lua_pushboolean(m_pLuaState, m_keyState[Robot::Key::KeyControl]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "Alt");
-	lua_pushboolean(m_pLuaState, s[Robot::Key::KeyAlt]);
+	lua_pushboolean(m_pLuaState, m_keyState[Robot::Key::KeyAlt]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_pushliteral(m_pLuaState, "System");
-	lua_pushboolean(m_pLuaState, s[Robot::Key::KeySystem]);
+	lua_pushboolean(m_pLuaState, m_keyState[Robot::Key::KeySystem]);
 	lua_settable(m_pLuaState, -3);
 
 	lua_setglobal(m_pLuaState, "Keyboard");
@@ -248,6 +124,35 @@ int CLuaWrapper::LuaLoadTexture(lua_State *L)
 	return 1;
 }
 
+int CLuaWrapper::LuaClearScreen(lua_State * L)
+{
+	lua_settop(L, 1);
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	// Now to get the data out of the table
+	// 'unpack' the table by putting the values onto
+	// the stack first. Then convert those stack values
+	// into an appropriate C type.
+	lua_getfield(L, 1, "red");
+	lua_getfield(L, 1, "green");
+	lua_getfield(L, 1, "blue");
+	lua_getfield(L, 1, "alpha");
+
+	// Get arguments
+	auto red = luaL_optnumber(L, -4, 1.0);
+	auto green = luaL_optnumber(L, -3, 1.0);
+	auto blue = luaL_optnumber(L, -2, 1.0);
+	auto alpha = luaL_optnumber(L, -1, 1.0);
+
+	// Draw sprite
+	m_pDirectXWrapper->ClearScreen(red, green, blue, alpha);
+
+	//
+	lua_pop(L, 4);
+
+	return 0;
+}
+
 int CLuaWrapper::LuaReleaseTexture(lua_State * L)
 {
 	auto texture = (ID3D11ShaderResourceView *)lua_touserdata(L, 1);
@@ -260,10 +165,10 @@ int CLuaWrapper::LuaReleaseTexture(lua_State * L)
 // TODO: Change this to accept a table with arguments
 int CLuaWrapper::LuaDrawSprite(lua_State *L)
 {
-	if (m_previousRenderCall != __FUNCTION__)
+	if (m_strPreviousRenderCall != __FUNCTION__)
 	{
 		// Begin sprite batch
-	    m_pDirectXWrapper->BeginSpriteBatch();
+		m_pDirectXWrapper->BeginSpriteBatch();
 	}
 
 	lua_settop(L, 1);
@@ -291,13 +196,13 @@ int CLuaWrapper::LuaDrawSprite(lua_State *L)
 	auto alphaBlend = luaL_optnumber(L, -1, 1.0);
 
 	// Draw sprite
-    m_pDirectXWrapper->DrawSprite(texture, xPosition, yPosition, redBlend, greenBlend, blueBlend, alphaBlend);
+	m_pDirectXWrapper->DrawSprite(texture, xPosition, yPosition, redBlend, greenBlend, blueBlend, alphaBlend);
 
 	//
-	lua_pop(L, 3);
+	lua_pop(L, 7);
 
 	//
-	m_previousRenderCall = __FUNCTION__;
+	m_strPreviousRenderCall = __FUNCTION__;
 
 	return 0;
 }
@@ -325,7 +230,7 @@ int CLuaWrapper::LuaReleaseFont(lua_State * L)
 // TODO: Change this to accept a table with arguments
 int CLuaWrapper::LuaDrawText(lua_State * L)
 {
-	if (m_previousRenderCall.find("DrawSprite") != std::string::npos)
+	if (m_strPreviousRenderCall.find("DrawSprite") != std::string::npos)
 	{
 		// End previous sprite batch
 		m_pDirectXWrapper->EndSpriteBatch();
@@ -357,7 +262,7 @@ int CLuaWrapper::LuaDrawText(lua_State * L)
 
 	lua_pop(L, 6);
 
-	m_previousRenderCall = __FUNCTION__;
+	m_strPreviousRenderCall = __FUNCTION__;
 
 	return 0;
 }
@@ -370,4 +275,124 @@ int CLuaWrapper::LuaLoadSound(lua_State *L)
 int CLuaWrapper::LuaPlaySound(lua_State *L)
 {
 	return 0;
+}
+
+CLuaWrapper::CLuaWrapper() :
+	m_iFPS(MINIMUM_FPS),
+	m_pLuaState(nullptr)
+{
+	m_pDirectXWrapper = new CDirectXWrapper();
+}
+
+CLuaWrapper::~CLuaWrapper()
+{
+	Close();
+
+	delete m_pDirectXWrapper;
+}
+
+bool CLuaWrapper::IsOpen()
+{
+	return (m_pLuaState != nullptr);
+}
+
+bool CLuaWrapper::Close()
+{
+	if (IsOpen())
+	{
+		lua_close(m_pLuaState);
+		m_pLuaState = nullptr;
+
+		return true;
+	}
+
+	return false;
+}
+
+bool CLuaWrapper::Open(const char *fn)
+{
+	Close();
+
+	m_pLuaState = luaL_newstate();
+	luaL_openlibs(m_pLuaState);
+
+	// TODO: use std::bind to register lua functions and remove the wrapper.
+	//lua_pushcclosure(m_pLuaState, std::bind(&CLuaWrapper::LuaGetDisplayWidth, this, std::placeholders::_1), 0);
+	//lua_setglobal(m_pLuaState, "GetDisplayWidth");
+
+	*static_cast<CLuaWrapper**>(lua_getextraspace(m_pLuaState)) = this;
+	
+	lua_register(m_pLuaState, "GetDisplayWidth", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetDisplayWidth>);
+	lua_register(m_pLuaState, "GetDisplayHeight", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetDisplayHeight>);
+	lua_register(m_pLuaState, "GetDisplayFrequency", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetDisplayFrequency>);
+	lua_register(m_pLuaState, "SetResolution", &NLuaWrapper::dispatch<&CLuaWrapper::LuaSetResolution>);
+	lua_register(m_pLuaState, "GetWidth", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetWidth>);
+	lua_register(m_pLuaState, "GetHeight", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetHeight>);
+	lua_register(m_pLuaState, "GetFPS", &NLuaWrapper::dispatch<&CLuaWrapper::LuaGetFPS>);
+	lua_register(m_pLuaState, "ClearScreen", &NLuaWrapper::dispatch<&CLuaWrapper::LuaClearScreen>);
+	lua_register(m_pLuaState, "LoadTexture", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadTexture>);
+	lua_register(m_pLuaState, "ReleaseTexture", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseTexture>);
+	lua_register(m_pLuaState, "DrawSprite", &NLuaWrapper::dispatch<&CLuaWrapper::LuaDrawSprite>);
+	lua_register(m_pLuaState, "LoadFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadFont>);
+	lua_register(m_pLuaState, "ReleaseFont", &NLuaWrapper::dispatch<&CLuaWrapper::LuaReleaseFont>);
+	lua_register(m_pLuaState, "DrawText", &NLuaWrapper::dispatch<&CLuaWrapper::LuaDrawText>);
+	lua_register(m_pLuaState, "LoadSound", &NLuaWrapper::dispatch<&CLuaWrapper::LuaLoadSound>);
+	lua_register(m_pLuaState, "PlaySound", &NLuaWrapper::dispatch<&CLuaWrapper::LuaPlaySound>);
+
+	if (luaL_dofile(m_pLuaState, fn) != LUA_OK)
+	{
+		Close();
+
+		return false;
+	}
+	
+	return true;
+}
+
+void CLuaWrapper::SetFPS(int iFPS)
+{
+	m_iFPS = std::max(iFPS, MINIMUM_FPS);
+}
+
+void CLuaWrapper::OnDestroy()
+{
+	if (!IsOpen()) return;
+
+	lua_getglobal(m_pLuaState, "OnDestroy");
+
+	lua_call(m_pLuaState, 0, 0);
+}
+
+void CLuaWrapper::OnUpdate(double deltaTime)
+{
+	if (!IsOpen()) return;
+
+	UpdateKeyboard();
+
+	lua_getglobal(m_pLuaState, "OnUpdate");
+	lua_pushnumber(m_pLuaState, deltaTime);
+	lua_call(m_pLuaState, 1, 0);
+}
+
+void CLuaWrapper::OnRender(double deltaTime)
+{
+	if (!IsOpen()) return;
+
+	// Execute draw commands from Lua
+	lua_getglobal(m_pLuaState, "OnRender");
+	lua_pushnumber(m_pLuaState, deltaTime);
+	lua_call(m_pLuaState, 1, 0);
+
+	// Check if sprite batch is still active
+	if (m_strPreviousRenderCall.find("DrawSprite") != std::string::npos)
+	{
+		// End sprite batch
+		m_pDirectXWrapper->EndSpriteBatch();
+	}
+
+	// Render to texture
+	m_pDirectXWrapper->Render();
+
+	// Reset tracked render call
+	m_strPreviousRenderCall = "";
 }

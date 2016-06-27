@@ -4,6 +4,11 @@
 
 class CFilter : public CSource
 {
+private:
+	CFilter(IUnknown *pUnk, HRESULT *pHr);
+	~CFilter();
+
+	//CPin *m_pPin;
 public:
 	static CUnknown * WINAPI CFilter::CreateInstance(IUnknown *pUnk, HRESULT *pHr);
 
@@ -15,9 +20,4 @@ public:
 	//STDMETHODIMP QueryInterface(REFIID riid, void **ppv);
 	//ULONG STDMETHODCALLTYPE AddRef() { return CSource::AddRef(); };
 	//ULONG STDMETHODCALLTYPE Release() { return CSource::Release(); };
-private:
-	CFilter(IUnknown *pUnk, HRESULT *pHr);
-	~CFilter();
-
-	//CPin *m_pPin;
 };
