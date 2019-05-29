@@ -1,9 +1,9 @@
 # AetherSource
-Programmable script-based source filter for DirectShow-compatible applications. Mainly for use with XSplit, FFSplit and Open Broadcaster Software. Currently supports Lua but will have support for more scripting languages soon.
+Programmable script-based source filter for DirectShow-compatible applications. Mainly for use with **XSplit, FFSplit and Open Broadcaster Software** or anything else that supports webcams. Currently supports **Lua** but will have support for more scripting languages soon.
 
 This plug-in predates the advent of Browser-Source in OBS, but is the same concept, only applied to scripting languages instead of HTML5.
 
-It also serves as an example of how to create a Virtual Web Cam / Capture Device (this part of the code is very lightweight and easily portable).
+It also serves as an example of **how to create a Virtual Web Cam / Capture Device** (this part of the code is very lightweight and easily portable).
 
 Compiles under Microsoft Visual Studio 2015.
 
