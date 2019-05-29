@@ -3,7 +3,7 @@ Programmable script-based source filter for DirectShow-compatible applications. 
 
 This plug-in predates the advent of Browser-Source in OBS, but is the same concept, only applied to scripting languages instead of HTML5.
 
-It also serves as an example of how to create a Virtual Web Cam / Capture Device (this part of the code is very lightweight).
+It also serves as an example of how to create a Virtual Web Cam / Capture Device (this part of the code is very lightweight and easily portable).
 
 Compiles under Microsoft Visual Studio 2015.
 
