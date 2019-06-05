@@ -18,4 +18,4 @@ Then, open your favorite streaming or chat app and add the AetherSource device.
 (I don't currently work on this project anymore, but if people ask, I will create an installer.)
 
 # Examples
-Live weather/music widgets, etc.
+Live weather/music widgets, input display, stream interaction, alerts, etc.
